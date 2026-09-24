@@ -98,6 +98,11 @@ class Trade(Contract):
     tax: Nonnegative
     slippageCost: Nonnegative
     pnl: Finite | None = None
+    pnlNet: Finite | None = None
+    pnlPercent: Finite | None = None
+    priceClose: Finite | None = None
+    grossValue: Finite | None = None
+    netValue: Finite | None = None
 
 
 class Action(Contract):
@@ -112,6 +117,15 @@ class Metrics(Contract):
     sharpeRatio: Finite | None
     winRate: Annotated[Finite, Field(ge=0, le=1)] | None
     totalTrades: int = Field(ge=0, strict=True)
+    sortinoRatio: Finite | None = None
+    cagr: Finite | None = None
+    calmarRatio: Finite | None = None
+    profitFactor: Nonnegative | None = None
+    avgWin: Finite | None = None
+    avgLoss: Finite | None = None
+    profitableTrades: int | None = Field(default=None, ge=0)
+    riskFreeRate: Finite | None = None
+    closedTrades: int | None = Field(default=None, ge=0)
     nullReasons: dict[str, str] = Field(default_factory=dict)
 
     @model_validator(mode="after")
@@ -123,7 +137,7 @@ class Metrics(Contract):
 
 
 class Evaluation(Contract):
-    role: Literal["validation", "test"]
+    role: Literal["train", "validation", "test"]
     ratioUnit: Literal["fraction"]
     startDate: date
     endDate: date
@@ -133,6 +147,13 @@ class Evaluation(Contract):
     slippage: Nonnegative
     settlementDays: int = Field(ge=0)
     metrics: Metrics
+    computedMetrics: dict[str, Finite] = Field(default_factory=dict)
+    riskProfile: dict[str, Finite | str] = Field(default_factory=dict)
+    realizedPnl: Finite | None = None
+    unrealizedPnl: Finite | None = None
+    dividendIncome: Finite | None = None
+    resultFidelity: Literal["exact", "reconstructed"] | None = None
+    executionTimeSec: Nonnegative | None = None
     nav: list[Nav] = Field(min_length=2, max_length=20000)
     trades: list[Trade] = Field(max_length=30000)
     actions: list[Action] = Field(min_length=1, max_length=20000)
@@ -152,6 +173,17 @@ class Evaluation(Contract):
             raise ValueError("evaluation rows outside declared window")
         if self.metrics.totalTrades != len(self.trades):
             raise ValueError("totalTrades must match execution rows")
+        if self.metrics.closedTrades is not None:
+            closed = [t for t in self.trades if t.action == "SELL" and t.pnlNet is not None]
+            wins = sum(t.pnlNet > 0 for t in closed)
+            if self.metrics.closedTrades != len(closed) or self.metrics.profitableTrades != wins:
+                raise ValueError("Closed trade counts must match realized execution PnL")
+            expected_win_rate = wins / len(closed) if closed else None
+            if expected_win_rate is None:
+                if self.metrics.winRate is not None:
+                    raise ValueError("Win rate is undefined without closed trades")
+            elif self.metrics.winRate is None or abs(self.metrics.winRate - expected_win_rate) > 1e-6:
+                raise ValueError("Win rate must use closed trades as its denominator")
         actual_return = self.nav[-1].balance / self.initialCapital - 1
         if abs(actual_return - self.metrics.totalReturn) > 1e-6:
             raise ValueError("totalReturn does not match final NAV / initial capital")
@@ -170,6 +202,7 @@ class Bundle(Contract):
     strategy: Strategy
     model: Model
     evaluation: Evaluation
+    inSample: Evaluation | None = None
     artifacts: list[Artifact] = Field(min_length=4, max_length=256)
 
     @model_validator(mode="after")
@@ -189,10 +222,15 @@ class Bundle(Contract):
         for role in required:
             if roles.count(role) != 1:
                 raise ValueError(f"exactly one {role} artifact is required")
-        if any(t.symbol not in self.model.symbols for t in self.evaluation.trades):
-            raise ValueError("trade symbol outside model universe")
-        if any(len(a.actions) != self.model.actionSize for a in self.evaluation.actions):
-            raise ValueError("action vector length differs from actionSize")
+        if self.evaluation.role == "train":
+            raise ValueError("Primary evaluation must be validation or test")
+        if self.inSample and (self.inSample.role != "train" or self.inSample.endDate >= self.evaluation.startDate):
+            raise ValueError("In-sample evaluation must precede the primary evaluation")
+        for evaluation in [self.evaluation, *([self.inSample] if self.inSample else [])]:
+            if any(t.symbol not in self.model.symbols for t in evaluation.trades):
+                raise ValueError("trade symbol outside model universe")
+            if any(len(a.actions) != self.model.actionSize for a in evaluation.actions):
+                raise ValueError("action vector length differs from actionSize")
         cfg = self.strategy.config
         if cfg.get("stocks") != self.model.symbols:
             raise ValueError("strategy.config.stocks must equal ordered model.symbols")

@@ -64,7 +64,7 @@ training metadata, XAI card/trace/manifest và OHLCV snapshot. Tỷ lệ dùng f
 
 Normalizer v1 nhận JSON `obs_rms` với `mean`, `var`, `count`; server tạo companion
 `vecnorm_obs_rms.pkl` từ số đã kiểm tra. Không nhận pickle normalizer từ client. Binary model chỉ đến từ nguồn admin tin cậy.
-CLI không deserialize pickle hay chạy code trong bundle.
+Các lệnh inspect/verify/import không deserialize pickle hay chạy code trong bundle.
 
 Đổi vị trí repo không thay identity; thay nội dung model/config/evidence tạo
 identity mới. Giữ cùng `artifact.id` khi di chuyển đường dẫn.
@@ -76,3 +76,39 @@ python -m pip install -e '.[test]'
 python -m pytest
 python -m build
 ```
+
+## Export checkpoint từ Strategy Lab (0.2.0)
+
+`export-lab` dùng đúng `research-model-package-v1`, kiểm hash weight/normalizer,
+đối chiếu NAV với trace gốc, lấy giá từ snapshot đã ghim và dựng workflow canvas
+từ cấu hình đã resolve. Không lấy số trung bình nhiều seed để gán cho một model.
+`evaluation.metrics.totalTrades` đếm execution; `closedTrades` là mẫu số của win
+rate và số giao dịch đóng được hiển thị như training. Hai số được giữ riêng.
+
+```bash
+python -m pip install '.[export]'
+strategy-bundle replay-lab /path/to/model-package \
+  --lab-root /path/to/promete-strategy-lab \
+  --backend-root /path/to/promete_fintech_backend \
+  --output /path/to/new-replay --trust-local-model
+strategy-bundle export-lab /path/to/model-package \
+  --lab-root /path/to/promete-strategy-lab \
+  --replay-dir /path/to/new-replay \
+  --output /path/to/new-bundle --trust-local-normalizer
+strategy-bundle verify /path/to/new-bundle
+```
+
+Replay dùng checkpoint và thống kê normalization cố định. NAV và toàn bộ lệnh
+ngoài kỳ phải khớp lần chạy gốc trước khi tính kết quả trong kỳ. Không train lại.
+Cần checkout lab/backend và snapshot dữ liệu gốc tương ứng; dùng môi trường
+Python/runtime ghi trong model package. Kết quả trong kỳ được ghi riêng ở
+`inSample`, không sao chép kết quả ngoài kỳ.
+
+Hai cờ `--trust-local-*` chỉ dùng với nguồn local đã được tin cậy: model loader
+và pickle có thể chạy mã. Các lệnh `inspect`, `verify`, `import` không thực thi
+model/pickle. Server nhận normalizer JSON và kiểm hợp đồng XAI bằng chính DTO
+của các terminal; chỉ số rủi ro được tính bằng cùng hàm của training.
+
+Exporter này dành cho nguồn Strategy Lab. Weight Huy phải lấy theo đúng
+strategy/version/seed và các artifact references trong `result.json` hoặc
+`registry.sqlite3`; HTML hay receipt trên Git không thay thế binary model.
