@@ -5,19 +5,32 @@ chiến lược mẫu ProfinAI. Python >= 3.11. Không cần cài PyTorch để 
 
 ## Cài từ Git
 
+Repo mã nguồn là public; cài thẳng bằng Git, không cần tài khoản GitHub:
+
+```bash
+pipx install 'git+https://github.com/leduy-it/strategy-bundle.git@v0.1.0'
+strategy-bundle --version
+strategy-bundle --help
+```
+
+Thay `@v0.1.0` bằng `@main` để cài bản mới nhất sau khi thay đổi ở nhánh main
+được merge. Dùng tag hoặc commit cố định để tái lập môi trường. Nếu không dùng
+`pipx`, tạo virtualenv rồi chạy `python -m pip install
+"git+https://github.com/leduy-it/strategy-bundle.git@v0.1.0"`.
+
+Repo chứa các bundle chiến lược có quyền truy cập riêng và có thể yêu cầu Git
+LFS; cài CLI public không tự cấp quyền tải bundle. API đích vẫn yêu cầu JWT của
+tài khoản có vai trò phù hợp.
+
+Để cài từ source checkout:
+
 ```bash
 git clone https://github.com/leduy-it/strategy-bundle.git
 cd strategy-bundle
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install .
-strategy-bundle --version
-strategy-bundle --help
 ```
-
-Hoặc `pipx install git+https://github.com/leduy-it/strategy-bundle.git@v0.1.0`. Dùng tag/commit cố định
-để tái lập môi trường. Repo private yêu cầu quyền clone; quyền clone code không
-đồng nghĩa quyền import vào hệ thống.
 
 ## Lấy chiến lược và import
 
