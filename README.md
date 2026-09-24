@@ -41,18 +41,32 @@ Registry. Nếu repo dùng Git LFS, phải tải file thật trước khi verify
 git clone git@git.promete.ai:duyle.promete/promete-sample-strategies.git
 cd promete-sample-strategies
 git lfs pull
-strategy-bundle inspect ./bundles/<strategy>
-strategy-bundle verify ./bundles/<strategy>
+strategy-bundle inspect ./bundles/lowbeta-stationary-ppo-s3
+strategy-bundle verify ./bundles/lowbeta-stationary-ppo-s3
 
-# Lấy access token qua đăng nhập tài khoản ADMIN/SUPER_ADMIN của môi trường đích.
-# Dán token bằng read -s để không ghi token vào shell history.
-read -rs STRATEGY_BUNDLE_TOKEN
-export STRATEGY_BUNDLE_TOKEN
-strategy-bundle import ./bundles/<strategy> --api https://app.profinai.vn --validate-only
-strategy-bundle commit <import-id> --api https://app.profinai.vn
-strategy-bundle status <import-id> --api https://app.profinai.vn
-unset STRATEGY_BUNDLE_TOKEN
+# Đăng nhập platform bằng tài khoản ADMIN/SUPER_ADMIN của môi trường đích.
+# Mở DevTools → Network, chọn một request API thành công của platform,
+# rồi copy giá trị Request Headers → Authorization (bỏ tiền tố "Bearer ").
+mkdir -p ~/.config/strategy-bundle
+chmod 700 ~/.config/strategy-bundle
+umask 077
+read -rsp 'Keycloak access token: ' strategy_bundle_token; printf '\n'
+printf '%s' "$strategy_bundle_token" > ~/.config/strategy-bundle/admin.jwt
+unset strategy_bundle_token
+chmod 600 ~/.config/strategy-bundle/admin.jwt
+
+strategy-bundle import ./bundles/lowbeta-stationary-ppo-s3 --api https://app.profinai.vn \
+  --token-file ~/.config/strategy-bundle/admin.jwt --validate-only
+strategy-bundle commit <import-id> --api https://app.profinai.vn \
+  --token-file ~/.config/strategy-bundle/admin.jwt
+strategy-bundle status <import-id> --api https://app.profinai.vn \
+  --token-file ~/.config/strategy-bundle/admin.jwt
 ```
+
+Token là access token Keycloak có hạn sử dụng; khi hết hạn, đăng nhập lại và thay
+token trong file. Token chỉ xác thực với API, không cấp quyền clone repo bundle.
+Quyền GitLab và quyền ADMIN/SUPER_ADMIN trên platform là hai quyền riêng. Không
+đưa token vào lệnh, shell history, Git hoặc ticket/chat.
 
 Bỏ `--validate-only` để upload → validate → commit trong một lệnh. Import lại
 cùng nội dung trả cùng ID, không tạo mẫu trùng. Khi kết nối bị ngắt, chạy lại
