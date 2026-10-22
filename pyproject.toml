@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "promete-strategy-bundle"
-version = "0.2.0"
+version = "0.2.1"
 description = "Portable strategy bundles and authenticated ProfinAI import CLI"
 readme = "README.md"
 requires-python = ">=3.11"

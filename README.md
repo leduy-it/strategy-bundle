@@ -8,15 +8,15 @@ chiến lược mẫu ProfinAI. Python >= 3.11. Không cần cài PyTorch để 
 Repo mã nguồn là public; cài thẳng bằng Git, không cần tài khoản GitHub:
 
 ```bash
-pipx install 'git+https://github.com/leduy-it/strategy-bundle.git@v0.1.0'
+pipx install 'git+https://github.com/leduy-it/strategy-bundle.git@v0.2.1'
 strategy-bundle --version
 strategy-bundle --help
 ```
 
-Thay `@v0.1.0` bằng `@main` để cài bản mới nhất sau khi thay đổi ở nhánh main
+Thay `@v0.2.1` bằng `@main` để cài bản mới nhất sau khi thay đổi ở nhánh main
 được merge. Dùng tag hoặc commit cố định để tái lập môi trường. Nếu không dùng
 `pipx`, tạo virtualenv rồi chạy `python -m pip install
-"git+https://github.com/leduy-it/strategy-bundle.git@v0.1.0"`.
+"git+https://github.com/leduy-it/strategy-bundle.git@v0.2.1"`.
 
 Repo chứa các bundle chiến lược có quyền truy cập riêng và có thể yêu cầu Git
 LFS; cài CLI public không tự cấp quyền tải bundle. API đích vẫn yêu cầu JWT của
@@ -41,8 +41,8 @@ Registry. Nếu repo dùng Git LFS, phải tải file thật trước khi verify
 git clone git@git.promete.ai:duyle.promete/promete-sample-strategies.git
 cd promete-sample-strategies
 git lfs pull
-strategy-bundle inspect ./bundles/lowbeta-stationary-ppo-s3
-strategy-bundle verify ./bundles/lowbeta-stationary-ppo-s3
+strategy-bundle inspect ./bundles/strategy-lab-v6/lowbeta-stationary-ppo-s3
+strategy-bundle verify ./bundles/strategy-lab-v6/lowbeta-stationary-ppo-s3
 
 # Đăng nhập platform bằng tài khoản ADMIN/SUPER_ADMIN của môi trường đích.
 # Mở DevTools → Network, chọn một request API thành công của platform,
@@ -55,7 +55,7 @@ printf '%s' "$strategy_bundle_token" > ~/.config/strategy-bundle/admin.jwt
 unset strategy_bundle_token
 chmod 600 ~/.config/strategy-bundle/admin.jwt
 
-strategy-bundle import ./bundles/lowbeta-stationary-ppo-s3 --api https://app.profinai.vn \
+strategy-bundle import ./bundles/strategy-lab-v6/lowbeta-stationary-ppo-s3 --api https://app.profinai.vn \
   --token-file ~/.config/strategy-bundle/admin.jwt --validate-only
 strategy-bundle commit <import-id> --api https://app.profinai.vn \
   --token-file ~/.config/strategy-bundle/admin.jwt
@@ -124,6 +124,12 @@ strategy-bundle export-lab /path/to/model-package \
   --output /path/to/new-bundle --trust-local-normalizer
 strategy-bundle verify /path/to/new-bundle
 ```
+
+`model.zip` trong bundle chỉ giữ policy: exporter bỏ optimizer và trạng thái huấn
+luyện (`_last_obs`, `ep_info_buffer`, `replay_buffer_class`, `train_freq`…) vì server
+từ chối chúng, và ghi danh sách đã bỏ vào `strategy.research.modelArchive`. Weight
+policy giữ nguyên; `verify` báo lỗi nếu bundle cũ còn các phần đó (cần export lại).
+Bundle export bằng bản trước 0.2.1 không import được.
 
 Replay dùng checkpoint và thống kê normalization cố định. NAV và toàn bộ lệnh
 ngoài kỳ phải khớp lần chạy gốc trước khi tính kết quả trong kỳ. Không train lại.

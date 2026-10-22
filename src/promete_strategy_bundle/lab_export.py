@@ -8,7 +8,6 @@ import csv
 import gzip
 import json
 import math
-import shutil
 from collections import defaultdict, deque
 from pathlib import Path
 from .contract import Bundle, sha256_file
@@ -269,7 +268,8 @@ def export_lab(source: Path, output: Path, lab_root: Path, *, trusted_normalizer
       'investor_card.json':('xai_card',card),'MANIFEST.json':('xai_manifest',xmanifest),'ohlcv.json':('ohlcv',ohlcv),
       'source-evidence.json':('research',{'metadata':meta,'recipe':recipe,'performance':read(source/'performance.json')})}
     for filename,(_,data) in files.items():write(output/filename,data)
-    shutil.copyfile(source/'model.zip',output/'model.zip')
+    from .model_archive import write_policy_archive
+    bundle['strategy']['research']['modelArchive'] = write_policy_archive(source/'model.zip', output/'model.zip')
     (output/'trace_test.jsonl').write_text(''.join(json.dumps(r,allow_nan=False)+'\n' for r in xrows))
     roles={'model.zip':'model','trace_test.jsonl':'xai_trace',**{k:v[0] for k,v in files.items()}}
     for i,(filename,role) in enumerate(roles.items()):

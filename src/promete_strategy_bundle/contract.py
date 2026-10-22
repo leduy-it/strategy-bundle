@@ -268,6 +268,9 @@ def verify_bundle(root: Path) -> Bundle:
         path = artifact_path(root, artifact.path)
         if path.stat().st_size != artifact.size or sha256_file(path) != artifact.sha256:
             raise ValueError(f"checksum/size mismatch: {artifact.path}; run git lfs pull if needed")
+        if artifact.role == "model":
+            from .model_archive import check_policy_archive
+            check_policy_archive(path)
     return bundle
 
 
