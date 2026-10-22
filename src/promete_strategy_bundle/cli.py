@@ -69,9 +69,27 @@ def main(argv=None) -> int:
         p = sub.choices[name]
         p.add_argument("--api", required=True, help="Backend origin, e.g. https://app.profinai.vn")
         p.add_argument("--token-file", type=Path, help="JWT file; otherwise STRATEGY_BUNDLE_TOKEN")
+    p = sub.add_parser("export-lab", help="Export a pinned research-model-package-v1 using its original trace and snapshots")
+    p.add_argument("source", type=Path)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--lab-root", type=Path, required=True)
+    p.add_argument("--trust-local-normalizer", action="store_true", help="Allow loading the hash-verified trusted source VecNormalize locally")
+    p.add_argument("--replay-dir", type=Path, help="Verified frozen-checkpoint in-sample evaluation directory")
+    p = sub.add_parser("replay-lab", help="Verify OOS replay and evaluate the same trusted checkpoint in-sample; never retrain")
+    p.add_argument("source", type=Path)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--lab-root", type=Path, required=True)
+    p.add_argument("--backend-root", type=Path, required=True)
+    p.add_argument("--trust-local-model", action="store_true")
     args = parser.parse_args(argv)
     try:
-        if args.command == "schema":
+        if args.command == "replay-lab":
+            from .lab_replay import replay_lab
+            result = replay_lab(args.source, args.output, args.lab_root, args.backend_root, trusted_model=args.trust_local_model)
+        elif args.command == "export-lab":
+            from .lab_export import export_lab
+            result = export_lab(args.source, args.output, args.lab_root, trusted_normalizer=args.trust_local_normalizer, replay_dir=args.replay_dir)
+        elif args.command == "schema":
             result = Bundle.model_json_schema()
         elif args.command in ("inspect", "verify"):
             bundle = verify_bundle(args.bundle) if args.command == "verify" else load_bundle(args.bundle / "manifest.json")
