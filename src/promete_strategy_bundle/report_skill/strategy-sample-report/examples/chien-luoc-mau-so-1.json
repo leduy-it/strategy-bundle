@@ -1,0 +1,368 @@
+{
+  "output_name": "chien-luoc-mau-so-1",
+  "meta": {
+    "title": "Báo cáo chiến lược mẫu số 1 — Linh hoạt Tấn công - Phòng thủ",
+    "source": "docs/strategy-editorial/150926-v2/inputs/strategy-993869802f1a23c5.html"
+  },
+  "cover": {
+    "kicker": "Báo cáo chiến lược mẫu",
+    "number_line": "Chiến lược mẫu số 1",
+    "title": "Linh hoạt Tấn công - Phòng thủ",
+    "facts": [
+      [
+        "Mã định danh",
+        "C__quality__Mid_Quality__P2k2 · ARS\nVersion ars__cfg-f41802e1eaee"
+      ],
+      [
+        "Danh mục đầu tư",
+        "BFC, BWE, CKG, IDC, NAB, TCM, TDC, TIG, TPB, VCS"
+      ],
+      [
+        "Giai đoạn huấn luyện",
+        "03/01/2023 - 28/08/2025"
+      ],
+      [
+        "Giai đoạn kiểm định",
+        "29/08/2025 - 05/03/2026"
+      ]
+    ]
+  },
+  "toc": {
+    "title": "Mục lục"
+  },
+  "sections": [
+    {
+      "title": "Tóm tắt điều hành",
+      "numbered": false,
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Trên giai đoạn kiểm định (29/08/2025 – 05/03/2026), chiến lược **Linh hoạt Tấn công - Phòng thủ** đạt lợi suất quy năm **+38,75%**, trong khi VN-Index tăng +7,51% và chiến lược mua và nắm giữ chính rổ cổ phiếu này lỗ −4,97%."
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược mẫu này là một chính sách phân bổ vốn do mô hình học tăng cường (Reinforcement Learning) học ra, vận hành trên một rổ cố định 10 cổ phiếu thuộc nhóm \"chất lượng trung bình\" (ROE 5–15%) của thị trường Việt Nam. Mỗi phiên, mô hình đọc 31 tín hiệu kỹ thuật của từng mã và quyết định tăng, giảm hay giữ nguyên vị thế, bao gồm cả việc giữ tiền mặt. Rổ cổ phiếu là phạm vi được phép giao dịch, không phải danh mục nắm giữ bắt buộc."
+        },
+        {
+          "type": "chart",
+          "kind": "bar",
+          "labels": [
+            "Chiến lược #1",
+            "VN-Index",
+            "Chiến lược mua & giữ"
+          ],
+          "values": [
+            38.75,
+            7.51,
+            -4.97
+          ],
+          "highlight": 0,
+          "ylabel": "Lợi nhuận năm",
+          "caption": "So sánh lợi nhuận năm của chiến lược với VN-Index trên giai đoạn kiểm định"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Chỉ tiêu",
+            "Trung vị 3 lần huấn luyện",
+            "Lần huấn luyện kém nhất"
+          ],
+          "widths": [
+            3,
+            3,
+            3
+          ],
+          "rows": [
+            [
+              "Lợi nhuận năm",
+              "+38,75%",
+              "+10,90%"
+            ],
+            [
+              "Vượt chiến lược mua & giữ",
+              "+43,72 đpt",
+              "+15,87 đpt"
+            ],
+            [
+              "Vượt momentum cùng rổ",
+              "+51,91 đpt",
+              "+24,07 đpt"
+            ],
+            [
+              "Sharpe (năm)",
+              "2,774",
+              "1,040"
+            ],
+            [
+              "Sụt giảm tối đa",
+              "−6,96%",
+              "−10,39%"
+            ]
+          ],
+          "note": "đpt: điểm phần trăm. Cùng cấu hình được huấn luyện 3 lần độc lập, mỗi lần khởi tạo ngẫu nhiên khác nhau; trung vị lấy riêng cho từng chỉ tiêu."
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược phù hợp với nhà đầu tư có **khẩu vị rủi ro trung bình – cao**, tìm kiếm tỷ suất sinh lời vượt trội từ một lớp phân bổ chủ động theo tín hiệu thị trường. Rủi ro lớn nhất cần cân nhắc là thanh khoản. Mô hình có quan sát thanh khoản của từng mã qua 2 chỉ báo riêng, và mọi lệnh bị giới hạn bởi lô 100 cổ phiếu, tiền mặt sẵn có và thanh toán T+2; tuy nhiên giới hạn tỷ lệ tham gia khối lượng và sức chứa vốn ở quy mô quỹ chưa được kiểm định."
+        },
+        {
+          "type": "p",
+          "text": "Khi một mã trong rổ gặp rủi ro bất ngờ, vị thế có thể được thoát ngay ở phiên kế tiếp, song song với việc xây một chiến lược mẫu mới không có mã đó."
+        }
+      ]
+    },
+    {
+      "title": "Điểm khác biệt trong chiến lược mẫu của ProFinAI",
+      "new_page": true,
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Trước khi đi vào cụ thể chiến lược, cần thống nhất chiến lược mẫu của ProFinAI là gì và phạm vi của nó đến đâu, vì cách đánh giá một chiến lược AI khác với cách đánh giá một danh mục do quỹ tự xây dựng."
+        },
+        {
+          "type": "p",
+          "text": "Quỹ truyền thống thường đi từ luận điểm: chọn cổ phiếu vì lý do cơ bản, đưa vào danh mục, rồi phân bổ vốn cho mã đó. Chiến lược mẫu của ProFinAI đi theo chiều ngược lại: danh mục là kết quả cuối cùng của một quy trình tìm kiếm, không phải điểm xuất phát."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Khía cạnh",
+            "Quỹ đầu tư",
+            "Chiến lược mẫu ProFinAI"
+          ],
+          "widths": [
+            2.6,
+            3.2,
+            6
+          ],
+          "rows": [
+            [
+              "Vai trò của rổ cổ phiếu",
+              "Các mã trong rổ đều được phân bổ nguồn vốn và giải ngân",
+              "Rổ là phạm vi được phép giao dịch; mã có thể không bao giờ được mua nếu không vượt qua các kiểm định tín hiệu."
+            ],
+            [
+              "Lý do chọn mã",
+              "Phân tích cơ bản từng mã",
+              "Lấy mẫu tất định từ một nhóm đặc tính (ở đây là ROE 5–15%), không có can thiệp của con người vào danh mục."
+            ],
+            [
+              "Tiêu chí thành công",
+              "Lợi nhuận danh mục so với chỉ số tham chiếu",
+              "Vượt các tiêu chí kiểm định trên nhiều lần huấn luyện độc lập."
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược này được định nghĩa bởi bộ trọng số đã huấn luyện cùng toàn bộ điều kiện đi kèm như danh sách 10 mã cổ phiếu, 31 tín hiệu kỹ thuật, thuật toán, siêu tham số, cửa sổ dữ liệu và môi trường thực thi. Các yếu tố này được khóa cứng vào trọng số, không thể thêm, bớt hay thay mã trong một chiến lược đang chạy. Bất kỳ thay đổi nào, kể cả chỉ bỏ một mã, sẽ tạo ra một chiến lược mới, phải huấn luyện lại và kiểm định lại trước khi được dùng."
+        }
+      ]
+    },
+    {
+      "title": "Mô tả danh mục",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Danh mục rổ 10 cổ phiếu thuộc nhóm vốn hóa vừa và nhỏ, gồm 7 mã niêm yết trên HOSE và 3 mã trên HNX. Các mã được lấy mẫu tất định từ nhóm ROE 5–15% sau bộ lọc độ phủ dữ liệu, không chọn theo nhận định từng doanh nghiệp."
+        },
+        {
+          "type": "p",
+          "text": "Cấu trúc danh mục cân bằng giữa phòng thủ và tăng trưởng với 3 phân loại:",
+          "after": 4,
+          "keep_next": true
+        },
+        {
+          "type": "bullets",
+          "items": [
+            "Nhóm phòng thủ tạo dòng tiền ổn định: Tiện ích cấp nước (**BWE**) và Phân bón nông nghiệp (**BFC**);",
+            "Nhóm động cơ tăng trưởng: Bất động sản Khu công nghiệp (**IDC**), Ngân hàng (**TPB** và **NAB**), cùng nhóm Vật liệu xây dựng và Xuất khẩu (**VCS** và **TCM**);",
+            "Nhóm biến động mạnh cùng thị trường: Bất động sản (**TDC**, **CKG** và **TIG**)."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Tín hiệu đầu vào",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Khi rổ cổ phiếu đã được cố định, mô hình chỉ quan sát thị trường thông qua bộ tín hiệu đầu vào (feature). Việc chọn 31 feature xuất phát từ ba yêu cầu chính:",
+          "keep_next": true
+        },
+        {
+          "type": "numbered",
+          "items": [
+            "**Giữ bộ tín hiệu đủ gọn để kiểm soát chi phí huấn luyện:** Với 31 feature trên 10 mã cổ phiếu, mô hình xử lý 310 giá trị tín hiệu cho mỗi phiên. Nếu tiếp tục tăng số lượng feature, thời gian huấn luyện sẽ tăng, đồng thời nguy cơ mô hình học cả nhiễu (noise) cũng lớn hơn. Vì vậy, mục tiêu không phải là đưa càng nhiều tín hiệu vào càng tốt, mà là giữ một bộ feature vừa đủ thông tin nhưng vẫn gọn.",
+            "**Đảm bảo độ phủ thông tin:** 31 feature được lựa chọn bằng phương pháp tham lam (greedy), với mục tiêu tái dựng tốt nhất một tập chỉ báo rộng hơn bằng số lượng tín hiệu tương đối nhỏ. Bộ feature cuối cùng bao quát sáu khía cạnh chính của hành vi giá: động lượng, xu hướng, biến động, khối lượng – dòng tiền, thanh khoản và rủi ro đuôi phân phối. Nhờ đó, mô hình có thể quan sát thị trường từ nhiều góc độ thay vì phụ thuộc vào một nhóm tín hiệu duy nhất.",
+            "**Đảm bảo tính nhất quán khi so sánh:** Sau khi được lựa chọn, tên và thứ tự của 31 feature được cố định trong toàn bộ chiến dịch thử nghiệm. Mọi rổ cổ phiếu và mọi thuật toán đều sử dụng cùng một bộ tín hiệu, giúp kết quả giữa các chiến lược được so sánh trên cùng một cơ sở."
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Nhóm",
+            "Số chỉ báo",
+            "Chỉ báo",
+            "Vai trò"
+          ],
+          "widths": [
+            2.1,
+            1.7,
+            5.6,
+            2.9
+          ],
+          "align": [
+            "left",
+            "center",
+            "left",
+            "left"
+          ],
+          "rules": "dotted",
+          "rows": [
+            [
+              "Động lượng",
+              "5",
+              "[01] RSI\n[02] Composite Momentum\n[03] Time-decayed Momentum\n[04] 1-Day Return\n[05] Momentum Consistency Score",
+              "Tìm cơ hội"
+            ],
+            [
+              "Xu hướng",
+              "6",
+              "[06] ADX\n[07] MACD Histogram\n[08] Price / SMA(50)\n[09] SMA(50) > SMA(200)\n[10] Trend Strength Indicator\n[11] Aroon Down",
+              "Tìm cơ hội"
+            ],
+            [
+              "Độ biến động",
+              "6",
+              "[12] NATR\n[13] Yang-Zhang Volatility Estimator\n[14] Maximum Drawdown 1Y\n[15] Downside to Upside Volatility Ratio\n[16] Volatility of Volatility\n[17] Chaikin Volatility",
+              "Đo mức dao động và rủi ro giảm giá"
+            ],
+            [
+              "Khối lượng & dòng tiền",
+              "6",
+              "[18] MFI\n[19] Chaikin Money Flow\n[20] Volume Z-Score\n[21] Negative Volume Index\n[22] Unusual Volume Alert\n[23] Chaikin A/D Line",
+              "Đo áp lực mua bán"
+            ],
+            [
+              "Thanh khoản",
+              "2",
+              "[24] Amihud Illiquidity Ratio\n[25] Zero-Return Days Ratio",
+              "Cảnh báo khó thoát hàng"
+            ],
+            [
+              "Rủi ro phân phối",
+              "6",
+              "[26] CVaR 5%\n[27] % Distance from 52-Week High\n[28] Return Kurtosis\n[29] Maximum Daily Return\n[30] Positive Return Probability\n[31] Tail Ratio",
+              "Đo lường mức lỗ có thể xảy ra"
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Khi một mã có **tín hiệu suy yếu**, hệ thống sẽ ưu tiên **giảm tỷ trọng** và **đưa phần vốn tương ứng về tiền mặt**. Sau đó, hệ thống mới đánh giá và lựa chọn cơ hội thay thế nếu có. Cách tiếp cận này giúp tránh việc vốn bị buộc phải tái đầu tư trong những giai đoạn thị trường hoặc nhiều cổ phiếu cùng lúc bước vào xu hướng bất lợi. Trong những thời điểm như vậy, tiền mặt được xem là một trạng thái phòng thủ ưu tiên."
+        }
+      ]
+    },
+    {
+      "title": "Hiệu quả thực tế",
+      "new_page": true,
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Giai đoạn kiểm định diễn ra đúng vào thời điểm rổ cổ phiếu suy yếu. Nếu mua và nắm giữ toàn bộ 10 mã, danh mục sẽ lỗ −4,97%/năm. Mô hình vẫn ghi nhận lợi nhuận trong cùng giai đoạn với mức sụt giảm tối đa trung vị −6,96%; lần huấn luyện kém nhất sụt −10,39%."
+        },
+        {
+          "type": "p",
+          "text": "Cơ chế cho phép điều này là **hệ thống không bắt buộc phải mua**: 10 mã trong rổ chỉ là danh sách các cổ phiếu được phép giao dịch, không có nghĩa vốn phải được phân bổ vào cả 10 mã. Khi tín hiệu trở nên kém thuận lợi, mô hình có thể chủ động giảm hoặc đóng vị thế và đưa vốn về tiền mặt; thậm chí, một mã có thể không được giải ngân trong suốt một khoảng thời gian. Vì vậy, chiến lược không chỉ tìm kiếm cổ phiếu phù hợp để mua, mà còn phải xác định khi nào nên đứng ngoài thị trường. Tuy nhiên, tỷ lệ tiền mặt và vị thế thực tế của từng mã qua từng phiên vẫn cần được xác nhận bằng sổ giao dịch."
+        },
+        {
+          "type": "p",
+          "text": "Mô hình được huấn luyện trên 2,5 năm dữ liệu. Bảng dưới đây đặt bối cảnh hai giai đoạn cạnh nhau để thấy kết quả kiểm định đến trong điều kiện nào:",
+          "keep_next": true
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Tiêu chí so sánh",
+            "Giai đoạn huấn luyện\n(03/01/2023 - 28/08/2025)",
+            "Giai đoạn kiểm định\n(29/08/2025 - 05/03/2026)"
+          ],
+          "widths": [
+            2.6,
+            4.6,
+            4.6
+          ],
+          "rows": [
+            [
+              "Bối cảnh vĩ mô",
+              "NHNN 4 lần hạ lãi suất; sóng hồi phục diễn ra trên diện rộng.",
+              "Thị trường giằng co, thanh khoản suy giảm do thắt chặt tiền tệ."
+            ],
+            [
+              "Hiệu suất rổ cổ phiếu",
+              "Tăng trưởng tích cực",
+              "Đa số ở xu hướng giảm hoặc đi ngang; mua & giữ cả rổ lỗ −4,97%/năm."
+            ],
+            [
+              "Chiến lược momentum thuần",
+              "Mua theo đà quán tính mang lại lợi nhuận cao.",
+              "Mua break-out dễ gặp bull-trap; chiến lược vượt momentum cùng rổ +51,91 đpt."
+            ],
+            [
+              "Chiến lược ARS",
+              "Học quy luật dịch chuyển của dòng tiền và cơ chế phòng thủ.",
+              "+38,75%/năm (trung vị 3 lần huấn luyện)."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Quản trị rủi ro và vận hành",
+      "new_page": true,
+      "blocks": [
+        {
+          "type": "h2",
+          "text": "Khi mã trong rổ gặp rủi ro bất ngờ"
+        },
+        {
+          "type": "p",
+          "text": "Với các sự kiện nghiêm trọng như vấn đề pháp lý, khủng hoảng doanh nghiệp hoặc hủy niêm yết, quy trình xử lý gồm hai bước:",
+          "keep_next": true
+        },
+        {
+          "type": "numbered",
+          "items": [
+            "**Xử lý ngoài mô hình:** Đóng vị thế và khóa mua mã bị ảnh hưởng. Phần vốn được giải phóng sẽ tạm thời giữ dưới dạng tiền mặt. Đây là lớp kiểm soát có thể được kích hoạt ngay từ phiên kế tiếp.",
+            "**Xử lý trong mô hình:** Tạo một rổ mới đã loại bỏ mã gặp sự cố, sau đó huấn luyện lại và đưa chiến lược mới qua đầy đủ quy trình kiểm định trước khi đưa vào sử dụng. Do trọng số của mô hình gắn với từng rổ, chiến lược mới được xem là một chiến lược độc lập và phải có mã định danh mới."
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Quy trình trên giúp thoát khỏi vị thế bị ảnh hưởng một cách nhanh chóng, nhưng không đảm bảo chiến lược thay thế sẽ duy trì được hiệu suất của chiến lược ban đầu. Phép thử bỏ mã cho thấy rõ điều này: khi loại **BFC** rồi huấn luyện lại, chỉ 1/3 lần huấn luyện đạt ngưỡng hiệu suất; khi loại **IDC**, 2/3 lần đạt."
+        },
+        {
+          "type": "h2",
+          "text": "Rủi ro thanh khoản"
+        },
+        {
+          "type": "p",
+          "text": "Các mã trong rổ thuộc nhóm vốn hóa vừa và nhỏ nên thanh khoản là rủi ro cần theo dõi sát. Mô hình quan sát thanh khoản qua chỉ báo Amihud và tỷ lệ phiên đứng giá, nhưng môi trường thực thi hiện chưa giới hạn tỷ lệ tham gia khối lượng và chưa có trượt giá cố định."
+        },
+        {
+          "type": "p",
+          "text": "Mô phỏng khớp lệnh trên các chiến dịch trước cho tỷ lệ khớp khoảng 98,5% ở vốn 1 tỷ đồng; quy mô vốn lớn hơn chưa được mô phỏng. Trước khi triển khai, cần chạy lại theo các bậc vốn thực tế với giới hạn % ADV, trượt giá và tỷ lệ không khớp."
+        },
+        {
+          "type": "h2",
+          "text": "Kết quả kiểm định"
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược vượt cả VN-Index lẫn mua & giữ cùng rổ trên giai đoạn kiểm định ở cả ba lần huấn luyện. Rủi ro cần cân nhắc nhất là **mức tập trung lãi**: ở cả ba lần huấn luyện, mã đóng góp lớn nhất chiếm từ 98% đến 113% lãi ròng, và phép thử bỏ mã ở trên cho thấy hiệu suất giảm rõ khi thiếu mã này. Các chỉ số trong báo cáo là kết quả mô phỏng trên dữ liệu lịch sử, đã tính phí giao dịch; chiến lược được chọn từ nhiều cấu hình thử nghiệm, vì vậy hiệu suất trong tương lai có thể thấp hơn, và kết quả quá khứ không bảo đảm lợi nhuận tương lai."
+        }
+      ]
+    }
+  ]
+}

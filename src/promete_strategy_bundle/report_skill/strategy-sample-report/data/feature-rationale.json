@@ -1,0 +1,1172 @@
+{
+ "source": {
+  "file": "46-feature-chien-luoc-mau.html (Telegram, 2026-09-18, hợp nhất nhánh Huy 31 + nhánh Duy 23)",
+  "sha256": "3c10d4e80fbad2862c651d7e227fa04ac2447d451ba2a9ae6e384bd5abaa9a9f"
+ },
+ "status": "Mục information/expected_benefit là GIẢ THUYẾT THIẾT KẾ, không phải đóng góp đã đo (theo chính tài liệu nguồn).",
+ "groups": {
+  "momentum": {
+   "name": "Động lượng",
+   "intro": "Nhóm lớn nhất trong kho ứng viên của nhánh Huy (28 cột), nhưng theo PCA chỉ cần khoảng 8 chiều để giữ 90% phương sai. Hai nhánh giữ những mặt khác nhau của cùng một hiện tượng. Nhánh Huy giữ các biến đổi của động lượng trung hạn, gồm bản gộp nhiều chân trời và bản làm mượt, cộng một thước đo độ đều của đà trong khoảng 32 phiên gần nhất. Nhánh Duy giữ bản gốc momentum_12_2 và thêm ultimate_oscillator, cột mà bộ 31 dựng lại kém (R² 0,33)."
+  },
+  "trend": {
+   "name": "Xu hướng",
+   "intro": "Nhánh Huy chọn các cột mô tả độ mạnh và tuổi của xu hướng (adx, trend_strength, aroon_down). Nhánh Duy mang đủ họ MACD và cặp tín hiệu ngắn 20/50. Ghép lại, danh mục có hai chân trời cho cùng một câu hỏi. close_to_sma_20 đi với close_to_sma_50, sma_20_above_50 đi với sma_50_above_200."
+  },
+  "price": {
+   "name": "Mốc giá",
+   "intro": "Sáu cột mang đơn vị đồng, chỉ có trong DEFAULT_11 và không nằm trong 95 ứng viên của nhánh Huy. Cả cụm tương quan với giá từ 0,615 đến 0,956, và bb_middle trùng hẳn sma_20. Chúng tôi giữ cụm này vì DEFAULT_11 là nhánh đối chứng production, không vì kỳ vọng nó mang thông tin mới."
+  },
+  "volatility": {
+   "name": "Biến động",
+   "intro": "Nhóm này có nhiều cặp cùng thông tin khác dạng, như atr (đồng) với natr (%), hay bb_width với yang_zhang_volatility. Nhánh Duy chỉ cần một cột mức biến động cho mỗi bộ. Nhánh Huy đi sâu vào hình dạng của biến động, gồm bất đối xứng hai phía, biến động của biến động, tốc độ mở rộng biên và ký ức sụt giảm một năm."
+  },
+  "volume": {
+   "name": "Khối lượng và dòng tiền",
+   "intro": "Nhóm khó nén nhất của cả kho. 16 ứng viên cần tới 10 chiều để giữ 90% phương sai, và dù chạm trần 6 cột, bộ 31 chỉ dựng lại được R² trung vị 0,542 cho phần còn lại. Hai nhánh cùng giữ volume_zscore và unusual_volume. Nhánh Huy thêm bốn cột về hướng dòng tiền, trong đó hai cột (ad_line, nvi) là chuỗi cộng dồn."
+  },
+  "liquidity": {
+   "name": "Thanh khoản",
+   "intro": "Chỉ có hai ứng viên và nhánh Huy giữ cả hai. Nhánh Duy chỉ giữ zero_return_days, vì amihud_illiquidity có tương quan với giá 0,434, vượt luật 0,40 của STATIONARY_12."
+  },
+  "risk": {
+   "name": "Phân phối rủi ro",
+   "intro": "Đây là chỗ bộ 15 feature cũ hở nhiều nhất. Trước khi chọn thêm, R² trung vị của nhóm chỉ 0,259 và return_kurtosis gần như không dựng lại được (0,003). Nhánh Huy thêm bốn cột mô tả hình dạng lợi suất. Nhánh Duy bổ sung return_skewness, cột mà bộ 31 vẫn dựng lại kém (0,39)."
+  }
+ },
+ "features": [
+  {
+   "no": 1,
+   "group": "momentum",
+   "name": "rsi",
+   "full_name": "Relative Strength Index",
+   "sets": [
+    "HUY · 31",
+    "DEFAULT_11"
+   ],
+   "what": "Dao động 0–100 so sánh mức tăng trung bình với mức giảm trung bình gần đây. Giá trị cao nghĩa là phía tăng đang chiếm ưu thế. Tự nó không phải lệnh bán.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "EWM span 14, min_periods 14",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,364"
+   },
+   "information": "Đà ngắn hạn khoảng hai tuần đang nghiêng về bên mua hay bên bán, và nghiêng đến đâu. Thang 0–100 cố định, không phụ thuộc mức giá của mã.",
+   "expected_benefit": "Vì thang cố định, RSI 75 ở mã 8 nghìn đồng và ở mã 200 nghìn đồng có cùng nghĩa. Một chính sách chung cho cả rổ có thể dùng điều học được ở mã này cho mã khác. Chúng tôi kỳ vọng mô hình học được hai phản ứng, theo đà khi RSI tăng dần từ vùng giữa, và bớt mua khi RSI đã ở vùng cực sau một nhịp tăng dài. RSI là một trong hai cột DEFAULT_11 nằm dưới ngưỡng tương quan giá 0,40.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy giữ RSI từ bộ 15 cũ, làm đại diện đầu tiên của nhóm động lượng. Hai phương pháp chọn khác hẳn nhau cùng giữ cột này."
+    }
+   ],
+   "caveat": "Code dùng pandas EWM span 14 (α = 2/15), nhanh hơn Wilder smoothing (α = 1/14), nên không khớp RSI Wilder trên nền tảng khác. Khi ALt = 0, code thay mẫu số bằng vô cùng nên RSI ra 0 chứ không phải 100. Trường hợp này chỉ xảy ra khi từ đầu chuỗi chưa có phiên giảm nào. Bản 31 feature trước đây ghi là 100. Với code hiện tại, giá trị đúng là 0."
+  },
+  {
+   "no": 2,
+   "group": "momentum",
+   "name": "momentum_composite",
+   "full_name": "Composite Momentum",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Trung bình không trọng số của lợi suất ở bốn chân trời 3, 6, 9 và 12–2 tháng, bỏ tháng gần nhất để giảm ảnh hưởng đảo chiều ngắn hạn.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63/126/189/252 phiên, bỏ 21 hoặc 42",
+    "Đơn vị": "Phân số",
+    "Tương quan với giá": "0,481"
+   },
+   "information": "Sức mạnh trung hạn của mã, tóm trong một con số và không phụ thuộc vào việc chọn đúng một chân trời. Mã tăng đều ở cả bốn chân trời sẽ có giá trị cao hơn mã chỉ tăng mạnh ở một chân trời.",
+   "expected_benefit": "Momentum ở thị trường nào cũng nhạy với chân trời đo. Lấy trung bình bốn chân trời là cách rẻ nhất để bớt rủi ro chọn sai chân trời, và mô hình nhận một tín hiệu xếp hạng mã mạnh, mã yếu ổn định hơn từng thành phần riêng lẻ.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 feature cũ, được giữ làm điểm khởi đầu của nhóm động lượng khi chạy thuật toán chọn."
+    }
+   ],
+   "caveat": "Feature nội bộ. Nó chứa đúng momentum_12_2 làm một trong bốn thành phần, nên hai cột này tương quan theo cấu trúc chứ không phải ngẫu nhiên. Paper momentum kinh điển hỗ trợ hiện tượng tiếp diễn ở chân trời 3–12 tháng, nhưng không định nghĩa composite này. Code lấy trung bình bỏ qua NaN, nên trong năm đầu của mỗi mã cột là trung bình của ít thành phần hơn. Từ phiên 63 đến 125 nó chỉ là lợi suất 3 tháng, đủ bốn thành phần từ phiên 252."
+  },
+  {
+   "no": 3,
+   "group": "momentum",
+   "name": "momentum_decayed",
+   "full_name": "Decay-weighted Momentum",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Momentum 12–2 được làm mượt bằng trung bình mũ half-life 63 phiên, quan sát gần hiện tại nặng ký hơn quan sát xa.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "12–2 tháng, half-life 63",
+    "Đơn vị": "Phân số",
+    "Tương quan với giá": "0,488"
+   },
+   "information": "Động lượng dài hạn đang được duy trì hay đang nguội dần. Hai mã cùng momentum_12_2 hôm nay có thể có momentum_decayed rất khác nhau nếu một mã vừa mới mạnh lên còn mã kia đã mạnh từ lâu và đang chững.",
+   "expected_benefit": "Cho mô hình thấy đạo hàm chậm của động lượng, thứ mà một ảnh chụp momentum tại một ngày không có. Kỳ vọng là mô hình giữ lâu hơn ở mã mà đà dài hạn còn bền.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thuật toán thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,132 của cột này, thấp nhất trong nhóm động lượng."
+    }
+   ],
+   "caveat": "Code dùng mặc định pandas adjust=True và min_periods=1. Đây là biến đổi nội bộ của tín hiệu 12–2, không phải công thức riêng trong Jegadeesh–Titman. Đầu vào của nó chính là momentum_12_2 của bộ STATIONARY_12."
+  },
+  {
+   "no": 4,
+   "group": "momentum",
+   "name": "momentum_consistency",
+   "full_name": "Momentum Consistency",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Tỉ lệ trong 12 phiên gần nhất mà tổng lợi suất 21 phiên tính tới phiên đó là dương. Cửa sổ trượt từng phiên, nên cả cột chỉ nhìn khoảng 32 phiên.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "12 tổng 21 phiên, trượt từng phiên, phủ 32 phiên",
+    "Đơn vị": "Tỉ lệ 0–1",
+    "Tương quan với giá": "0,382"
+   },
+   "information": "Đà tăng khoảng một tháng rưỡi gần đây đã đứng vững hay tổng lợi suất một tháng còn đang lật dấu quanh 0. Cột đo tần suất chứ không đo độ lớn.",
+   "expected_benefit": "Hai mã cùng có lợi suất 21 phiên dương hôm nay. Một mã đã dương liên tục 12 phiên, mã kia vừa lật dấu hôm qua. Cột này cho mô hình phân biệt đà đã đứng vững với đà vừa hình thành, loại dễ lật lại.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,204."
+    }
+   ],
+   "caveat": "Docstring ghi tổng thời gian nhìn lại là 252 phiên, tức ý định là tỉ lệ tháng tăng trong một năm. Code lại lấy rolling(21).sum() > 0 rồi rolling(12).mean() trên chuỗi trượt từng phiên, nên 12 lần đo chồng lấn gần hết và chỉ phủ khoảng 32 phiên. Cột đang chạy là một thước đo ngắn hạn, không phải thước đo một năm. Code cộng lợi suất đơn thay vì ghép lãi kép. Trong giai đoạn khởi động, NaN > 0 thành False nên cột đọc 0 ở các phiên 11–20 và bị kéo thấp tới khoảng phiên 31."
+  },
+  {
+   "no": 5,
+   "group": "momentum",
+   "name": "momentum_12_2",
+   "full_name": "12–2 Month Momentum",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Lợi suất từ khoảng một năm trước đến khoảng hai tháng trước, bỏ qua hai tháng gần nhất.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "Lookback 252 phiên, bỏ 42 phiên",
+    "Đơn vị": "Phân số",
+    "Tương quan với giá": "0,396"
+   },
+   "information": "Mã này đã là mã mạnh hay mã yếu trong gần một năm qua. Đây là cột duy nhất trong bộ nhìn xa tới 252 phiên. Các cột còn lại chỉ nhìn 1 đến 63 phiên.",
+   "expected_benefit": "Hiện tượng momentum ở chân trời 3–12 tháng [R2] gợi ý mã thắng trong năm qua có xu hướng tiếp tục thắng. Bỏ hai tháng gần nhất là để tránh nhiễu đảo chiều ngắn hạn. Chúng tôi kỳ vọng mô hình dùng cột này để ưu tiên nhóm mã mạnh dài hạn, còn các cột ngắn hạn quyết định thời điểm vào ra.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Trong bộ 31, tín hiệu này không đứng riêng. Nó là một trong bốn thành phần của momentum_composite và là đầu vào của momentum_decayed. Hai nhánh giữ cùng một tín hiệu ở hai dạng, nhánh Duy dạng gốc, nhánh Huy dạng tổng hợp và làm mượt."
+    }
+   ],
+   "caveat": "Bỏ 42 phiên chứ không phải 21 như công thức 12–1 kinh điển. Độ dịch tính theo số phiên của chính mã. Cột cần 253 phiên khởi động. Snapshot Wave 3 để NaN trong giai đoạn này. Riêng bảng kho data/full được ghi bởi một revision backend cũ có backfill, nên 63/68 mã niêm yết sau giữa 2020 mang một giá trị hằng trong 251 dòng đầu. Code backend hiện tại chỉ forward-fill. Tương quan với giá 0,396, sát ngưỡng 0,40."
+  },
+  {
+   "no": 6,
+   "group": "momentum",
+   "name": "close_pct_change_1d",
+   "full_name": "One-day Close Return",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Lợi suất đơn một phiên của giá đóng cửa đã chuẩn hoá theo price basis của pipeline.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "1 phiên",
+    "Đơn vị": "Phân số",
+    "Tương quan với giá": "0,102"
+   },
+   "information": "Cú sốc giá vừa xảy ra ở phiên gần nhất, kể cả những phiên chạm trần hoặc chạm sàn.",
+   "expected_benefit": "Đây là tín hiệu ngắn nhất trong bộ, được xếp vào họ \"đảo chiều ngắn\". Mô hình có thông tin để phản ứng với cú sốc hôm qua thay vì chỉ thấy nó qua các trung bình trượt đã làm mượt. Chiều phản ứng được để mô hình tự học. Ở thị trường có biên độ trần/sàn, một phiên chạm trần có thể kéo theo phiên tăng tiếp thay vì đảo chiều.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy thêm cột này vì bộ 15 cũ chỉ dựng lại được R² 0,201. Lợi suất một phiên gần như không suy ra được từ các cột động lượng cửa sổ dài, nên nó là thông tin riêng."
+    }
+   ],
+   "caveat": "pandas pct_change(1), không phải log-return. Làm tròn 3 chữ số nên bước nhỏ nhất là 0,1%. Giá trị ngày t chỉ hợp lệ sau khi Closet chốt, và môi trường dùng nó cho quyết định và lệnh ngày t+1."
+  },
+  {
+   "no": 7,
+   "group": "momentum",
+   "name": "ultimate_oscillator",
+   "full_name": "Ultimate Oscillator",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Dao động 0–100 gộp áp lực mua ở ba chân trời 7, 14 và 28 phiên, trọng số nghiêng về chân trời ngắn.",
+   "facts": {
+    "Đầu vào": "High, Low, Close",
+    "Cửa sổ": "7 / 14 / 28, trọng số 4 / 2 / 1",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,218"
+   },
+   "information": "Giá đóng cửa thường nằm gần đỉnh hay gần đáy của biên độ thật, đo cùng lúc ở ba chân trời. Khác RSI ở chỗ nó dùng vị trí giá đóng cửa trong biên của phiên, không chỉ dùng chênh lệch giữa hai giá đóng cửa.",
+   "expected_benefit": "Nó đóng vai dao động giới hạn giống RSI ở DEFAULT_11, nhưng không phụ thuộc vào một chân trời duy nhất. Chúng tôi kỳ vọng nó cho ít tín hiệu quá mua, quá bán giả hơn trong giai đoạn thị trường đi ngang, khi một chân trời ngắn dễ dao động qua lại.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Sau khi chọn đủ 31 cột, đây là một trong ba cột nhóm động lượng mà bộ 31 dựng lại kém nhất (R² 0,328). STATIONARY_12 mang nó vào đúng chỗ bộ 31 còn hở."
+    }
+   ],
+   "caveat": "Phiên đầu là NaN vì chưa có Ct−1, nên giá trị đầu tiên xuất hiện ở phiên thứ 29. Khi tổng TR bằng 0, kết quả là NaN."
+  },
+  {
+   "no": 8,
+   "group": "trend",
+   "name": "adx",
+   "full_name": "Average Directional Index",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Đo độ mạnh của xu hướng, không đo hướng. Hướng nằm ở quan hệ giữa DI⁺ và DI⁻.",
+   "facts": {
+    "Đầu vào": "High, Low, Close",
+    "Cửa sổ": "14 phiên (EMA span 14)",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,156"
+   },
+   "information": "Thị trường của mã đang có xu hướng rõ hay đang giằng co, đo bằng biên độ trong phiên (High, Low) chứ không chỉ bằng giá đóng cửa.",
+   "expected_benefit": "Cột bối cảnh cho các tín hiệu xu hướng. Nó bổ sung trend_strength ở đúng chỗ trend_strength yếu. Một phiên đóng cửa đi ngang nhưng biên độ trong phiên mở rộng về một phía vẫn được ADX ghi nhận.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ, đại diện đầu tiên của nhóm xu hướng."
+    }
+   ],
+   "caveat": "Code dùng EMA span 14, không dùng Wilder smoothing nguyên bản, nên phản ứng nhanh hơn ADX chuẩn Wilder."
+  },
+  {
+   "no": 9,
+   "group": "trend",
+   "name": "macd_line",
+   "full_name": "MACD Line",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Chênh lệch giữa trung bình mũ 12 phiên và 26 phiên của giá đóng cửa. Dương nghĩa là xu hướng ngắn đang chạy trên xu hướng trung.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "EMA 12 và 26, adjust=False",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,520"
+   },
+   "information": "Một tín hiệu xu hướng đã làm mượt. Nó cho biết khoảng cách giữa nhịp giá khoảng hai tuần rưỡi và nhịp giá khoảng năm tuần, tức giá đang tăng tốc lên trên nền trung hạn hay đang bị kéo xuống dưới.",
+   "expected_benefit": "Lợi suất ngày rất nhiễu. Có một tín hiệu xu hướng đã làm mượt, mô hình có thể giữ vị thế qua những nhịp rung nhỏ thay vì mua bán theo từng phiên, qua đó bớt phí giao dịch. Ý kiến cho rằng họ MACD là nhiễu đã bị phép đo bác bỏ. Ở fold F4, cột MACD tốt nhất có |IC-IR| 0,302, nằm gần đầu bảng 125 cột.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Bộ 31 chỉ giữ macd_histogram. Cột này không nằm trong ba cột bộ 31 dựng lại kém nhất ở nhóm xu hướng, tức R² trên 0,51. Nếu một ngày train trên bộ 31 cộng thêm cột này, nên đo nó như một cột có ít thông tin mới."
+    }
+   ],
+   "caveat": "Cột mang đơn vị đồng nên độ lớn tỉ lệ với giá. VecNormalize chuẩn hoá theo từng ô mã × cột nên so sánh trong cùng một mã vẫn đọc được, nhưng mã đổi mặt bằng giá mạnh sau kỳ train sẽ lệch khỏi dải đã học. EMA bắt đầu từ phiên đầu tiên, không có min_periods, nên các phiên đầu chuỗi lệch về giá mở đầu."
+  },
+  {
+   "no": 10,
+   "group": "trend",
+   "name": "macd_signal",
+   "full_name": "MACD Signal Line",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Trung bình mũ 9 phiên của chính đường MACD. Đây là phiên bản chậm của macd_line.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "EMA 9 trên MACD 12/26",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,514"
+   },
+   "information": "Riêng cột này ít thông tin mới. Giá trị của nó nằm ở cặp (macd_line, macd_signal). Line nằm trên signal nghĩa là đà xu hướng đang mạnh lên, line cắt xuống signal nghĩa là đà đang yếu đi.",
+   "expected_benefit": "Đưa cả mức và đường tham chiếu của nó vào giúp mô hình thấy thời điểm đà đổi chiều mà không phải tự nhớ quá khứ của MACD. Đây là cách dùng MACD quen thuộc nhất trong phân tích kỹ thuật, nên nó cũng là phần dễ giải thích nhất khi đọc lại hành vi mô hình.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Bộ 31 chỉ giữ macd_histogram. Như macd_line, cột này không nằm trong ba cột bộ 31 dựng lại kém nhất ở nhóm xu hướng, tức R² trên 0,51."
+    }
+   ],
+   "caveat": "Ba cột MACD chỉ mang hai chiều thông tin độc lập, vì macd_histogram đúng bằng macd_line − macd_signal ở từng phiên (tới sai số làm tròn ba chữ số)."
+  },
+  {
+   "no": 11,
+   "group": "trend",
+   "name": "macd_histogram",
+   "full_name": "MACD Histogram",
+   "sets": [
+    "HUY · 31",
+    "DEFAULT_11"
+   ],
+   "what": "Khoảng cách giữa MACD và đường tín hiệu. Dấu và độ lớn phản ánh gia tốc tương đối của hai EMA.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "EMA 12/26, signal 9",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,143"
+   },
+   "information": "Gia tốc của xu hướng. Histogram đổi dấu đúng lúc MACD cắt đường tín hiệu. Khi đà bắt đầu yếu, nó thu nhỏ dần, trước cả lúc hai đường cắt nhau.",
+   "expected_benefit": "Đây là dạng thông tin gần với \"thời điểm\" nhất trong họ MACD. Chúng tôi kỳ vọng mô hình dùng nó để giảm vị thế khi đà yếu đi, thay vì chờ giá giảm rồi mới phản ứng. Tương quan với giá chỉ 0,143, thấp nhất trong DEFAULT_11, nên đây là cột MACD ít bị trôi theo mặt bằng giá nhất.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy giữ từ bộ 15 cũ và chỉ giữ đúng cột này của họ MACD. Hai cột còn lại của họ không nằm trong ba cột mà bộ 31 dựng lại kém nhất ở nhóm xu hướng (cột thứ ba trong số đó có R² 0,51). Nhánh Huy vì thế coi macd_line và macd_signal là thông tin đã có, còn DEFAULT_11 giữ đủ cả ba."
+    }
+   ],
+   "caveat": "Đơn vị vẫn là đồng. Cột là tổ hợp tuyến tính chính xác của hai cột MACD còn lại, nên nó không thêm chiều thông tin mới. Nó chỉ đưa sẵn phép trừ để mô hình khỏi phải tự học."
+  },
+  {
+   "no": 12,
+   "group": "trend",
+   "name": "close_to_sma_20",
+   "full_name": "Close-to-SMA20 Ratio",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Tỉ số giữa giá đóng cửa và trung bình 20 phiên. Trên 1 là giá nằm trên xu hướng tháng, dưới 1 là nằm dưới.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên",
+    "Đơn vị": "Tỉ số quanh 1,0",
+    "Tương quan với giá": "0,383"
+   },
+   "information": "Cùng ý với cặp giá đóng cửa và sma_20 ở DEFAULT_11, nhưng đã quy thành tỉ số. Giá trị 1,05 nghĩa là giá cao hơn trung bình tháng 5%, ở mọi mã và mọi năm.",
+   "expected_benefit": "Mô hình không phải tự học phép chia giữa hai ô đã chuẩn hoá riêng. Vì tỉ số không trôi theo mặt bằng giá, điều mô hình học ở kỳ train vẫn còn nghĩa ở kỳ giao dịch, kể cả khi mã đã tăng gấp đôi giá. Đây là cột thay thế trực tiếp cho cụm mốc giá của DEFAULT_11.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Nhánh Huy có close_to_sma_50. Hai cột là cùng một câu hỏi ở hai chân trời."
+    }
+   ],
+   "caveat": "Đây là tỉ số, không phải phần trăm chênh lệch. Muốn phần trăm thì lấy X − 1. Tương quan với giá 0,383, sát ngưỡng 0,40 hơn các cột khác trong bộ. Backend không chặn mẫu số bằng 0, giá trị vô cùng được đổi thành NaN."
+  },
+  {
+   "no": 13,
+   "group": "trend",
+   "name": "close_to_sma_50",
+   "full_name": "Close-to-SMA50 Ratio",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Tỉ số giữa giá đóng cửa và trung bình 50 phiên. Trên 1 là giá nằm trên xu hướng khoảng hai tháng rưỡi.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "50 phiên",
+    "Đơn vị": "Tỉ số quanh 1,0",
+    "Tương quan với giá": "0,547"
+   },
+   "information": "Vị trí của giá so với xu hướng trung hạn, dạng tỉ số không đơn vị.",
+   "expected_benefit": "Ghép với close_to_sma_20 của STATIONARY_12, danh mục có cùng một câu hỏi ở hai chân trời. Giá trên cả hai đường là xu hướng đồng thuận. Giá trên đường 20 nhưng dưới đường 50 thường là nhịp hồi trong xu hướng giảm, và mô hình cần cả hai cột mới phân biệt được.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "Tương quan với giá 0,547, vượt ngưỡng 0,40 của luật STATIONARY_12 dù cột không mang đơn vị đồng. Lý do là năm 2024 nhiều mã có xu hướng rõ, nên tỉ số này chạy cùng chiều mức giá trong từng mã. Đây là ví dụ cho thấy thước tương quan với giá là một proxy thô."
+  },
+  {
+   "no": 14,
+   "group": "trend",
+   "name": "sma_20_above_50",
+   "full_name": "SMA20 above SMA50",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Biến 0/1 cho biết trung bình 20 phiên có đang nằm trên trung bình 50 phiên không.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 và 50 phiên",
+    "Đơn vị": "Nhị phân 0/1",
+    "Tương quan với giá": "0,340"
+   },
+   "information": "Trạng thái xu hướng ngắn so với trung hạn của từng mã, dạng công tắc bật/tắt. Nó chỉ đổi khi hai đường trung bình cắt nhau, nên ổn định hơn close_to_sma_20.",
+   "expected_benefit": "Một công tắc chế độ theo từng mã. Chúng tôi kỳ vọng mô hình dùng nó để bật hoặc tắt các hành vi khác, chẳng hạn chỉ tin tín hiệu mua ngắn hạn khi xu hướng trung hạn đang lên. Vì chỉ có hai giá trị, cột này không thể trôi theo mặt bằng giá.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Nhánh Huy có sma_50_above_200. Ghép lại thành hai tầng công tắc xu hướng, ngắn và dài."
+    }
+   ],
+   "caveat": "Không đo khoảng cách giữa hai đường hay thời điểm cắt nhau. Trong 50 phiên khởi động, snapshot Wave 3 để NaN. Backend production lại trả 0, tức đọc nhầm thành \"xu hướng xuống\", nên cần sửa trước khi dùng cột này ngoài lab."
+  },
+  {
+   "no": 15,
+   "group": "trend",
+   "name": "sma_50_above_200",
+   "full_name": "SMA50 above SMA200",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Biến 0/1 cho biết trung bình 50 phiên có nằm trên trung bình 200 phiên không.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "50 và 200 phiên",
+    "Đơn vị": "Nhị phân 0/1",
+    "Tương quan với giá": "0,417"
+   },
+   "information": "Trạng thái xu hướng dài hạn của từng mã, thứ mà giới giao dịch gọi là giao cắt vàng hay giao cắt tử thần.",
+   "expected_benefit": "Công tắc chế độ dài hạn. Cùng sma_20_above_50 của STATIONARY_12, danh mục có hai tầng công tắc. Mô hình có thể học rằng tín hiệu mua ngắn hạn đáng tin hơn khi cả hai công tắc cùng bật.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,200, thấp nhất nhóm xu hướng."
+    }
+   ],
+   "caveat": "Không đo khoảng cách hay thời điểm cắt nhau, chỉ lưu trạng thái. Trong 199 phiên đầu, SMA200 chưa có giá trị, và phép so sánh (sma_50 > sma_200).astype(float) trả 0 chứ không trả NaN. Cột vì thế đọc nhầm thành “SMA50 nằm dưới SMA200” trong gần một năm đầu của mỗi mã. Forward-fill của pipeline không sửa được lỗi này vì giá trị đã là 0. Đây là cùng lỗi với sma_20_above_50, chỉ kéo dài gần bốn lần."
+  },
+  {
+   "no": 16,
+   "group": "trend",
+   "name": "trend_strength",
+   "full_name": "Price-only Trend Strength",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Mức mất cân bằng tuyệt đối giữa lợi suất dương và âm trong 14 phiên. Gần 100 là một phía áp đảo, gần 0 là hai phía cân bằng.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "14 phiên, trung bình cộng",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,148"
+   },
+   "information": "Thị trường của mã đó đang có xu hướng rõ hay đang đi ngang. Cột không cho biết hướng, chỉ cho biết độ rõ.",
+   "expected_benefit": "Cột này là bối cảnh để đọc các cột khác. Khi xu hướng rõ, tín hiệu động lượng (momentum_12_2, close_to_sma_20) đáng tin hơn. Khi đi ngang, tín hiệu dao động (ultimate_oscillator) hợp hơn. Chúng tôi kỳ vọng mô hình học được việc chuyển trọng tâm giữa hai nhóm tín hiệu này mà không cần luật cứng.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy thêm vì bộ 15 cũ chỉ dựng lại được R² 0,212. Trong bộ 31, nó đi cùng adx. Một cột đo độ rõ xu hướng từ giá đóng cửa, cột kia đo từ biên độ trong phiên."
+    }
+   ],
+   "caveat": "Tên gợi tới ADX nhưng cột không dùng High/Low, True Range hay directional movement. Không nên mô tả nó như một ADX thứ hai."
+  },
+  {
+   "no": 17,
+   "group": "trend",
+   "name": "aroon_down",
+   "full_name": "Aroon Down",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Cao khi đáy thấp nhất của 25 phiên gần nhất xuất hiện gần hiện tại. Bằng 100 khi hôm nay là đáy mới.",
+   "facts": {
+    "Đầu vào": "Low",
+    "Cửa sổ": "25 phiên, cửa sổ gồm 26 điểm",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,267"
+   },
+   "information": "Áp lực bán còn “tươi” hay đã cũ, đo bằng thời gian kể từ đáy gần nhất chứ không đo bằng mức giá.",
+   "expected_benefit": "Các cột mức (giá so với trung bình) không trả lời được câu “đáy mới vừa xảy ra chưa”. Cột này thì có. Kỳ vọng là mô hình tránh bắt đáy khi đáy mới liên tục xuất hiện.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ dựng lại được R² 0,350."
+    }
+   ],
+   "caveat": "Code duyệt 26 quan sát từ t−25 đến t. Cách biểu diễn tương đương với số phiên kể từ đáy, nhưng cần giữ đúng quy ước này khi đối chiếu thư viện khác. Khi có hai đáy bằng nhau, code lấy đáy cũ hơn, còn TA-Lib lấy đáy gần hơn."
+  },
+  {
+   "no": 18,
+   "group": "price",
+   "name": "sma_20",
+   "full_name": "Simple Moving Average 20",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Trung bình cộng giá đóng cửa trong 20 phiên, khoảng một tháng giao dịch.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,872"
+   },
+   "information": "Mốc xu hướng một tháng. Đặt cạnh giá đóng cửa, nó cho biết giá đang ở trên hay dưới xu hướng ngắn.",
+   "expected_benefit": "Đứng trên hay dưới đường trung bình tháng là một trong những bộ lọc xu hướng đơn giản nhất. Chúng tôi kỳ vọng mô hình ưu tiên giữ mã đang nằm trên đường này và thận trọng với mã vừa rơi xuống dưới. Cùng với ema_10, nó cho mô hình một cặp nhanh–chậm để nhận ra lúc xu hướng ngắn đổi hướng.",
+   "selection_note": [],
+   "caveat": "Trùng hoàn toàn với bb_middle. Dạng tỉ số không đơn vị của cùng thông tin này là close_to_sma_20 trong STATIONARY_12."
+  },
+  {
+   "no": 19,
+   "group": "price",
+   "name": "ema_10",
+   "full_name": "Exponential Moving Average 10",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Trung bình mũ 10 phiên của giá đóng cửa. Phiên gần nhận trọng số lớn hơn nên phản ứng nhanh hơn sma_20.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "EMA span 10 (α = 2/11), adjust=False",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,956"
+   },
+   "information": "Mốc xu hướng hai tuần, nhạy với biến động mới hơn trung bình cộng.",
+   "expected_benefit": "Khi ema_10 cắt lên hoặc cắt xuống sma_20, xu hướng ngắn đang đổi hướng. Mô hình có sẵn cả hai đường nên có thể phản ứng sớm hơn so với chỉ nhìn một đường trung bình.",
+   "selection_note": [],
+   "caveat": "Tương quan với giá 0,956, cao nhất trong 23 cột ở đây. Gần như là giá đóng cửa đã làm mượt. EMA bắt đầu từ phiên đầu tiên, không có min_periods."
+  },
+  {
+   "no": 20,
+   "group": "price",
+   "name": "bb_upper",
+   "full_name": "Bollinger Band, dải trên",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Mức giá cách trung bình 20 phiên hai độ lệch chuẩn về phía trên. Đây là biên trên của vùng giá \"bình thường\" gần đây.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên, k = 2, ddof = 1",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,873"
+   },
+   "information": "Một mốc giá động phía trên. Đặt cạnh giá đóng cửa trong vector trạng thái, nó cho biết giá đang ép sát biên trên hay còn cách xa.",
+   "expected_benefit": "Giá chạm hoặc vượt biên trên có hai cách đọc, hoặc đà rất mạnh, hoặc đã quá mua. Kết hợp với RSI và MACD, mô hình có thể học cách phân biệt hai trường hợp này thay vì dùng một ngưỡng cứng. Tuy vậy, mô hình phải tự học tỉ số giữa hai ô đã chuẩn hoá riêng (close và bb_upper), khó hơn so với nhận sẵn tỉ số đó. STATIONARY_12 đưa thẳng tỉ số dưới dạng close_to_sma_20 và bb_width.",
+   "selection_note": [],
+   "caveat": "Tương quan với giá 0,873. Thuộc cụm sáu cột mức giá tương quan rất cao với nhau."
+  },
+  {
+   "no": 21,
+   "group": "price",
+   "name": "bb_middle",
+   "full_name": "Bollinger Band, dải giữa",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Dải giữa Bollinger, theo định nghĩa là trung bình cộng 20 phiên của giá đóng cửa.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,872"
+   },
+   "information": "Tâm của dải Bollinger. Về thông tin, cột này đúng bằng sma_20. Hai cột là cùng một dãy số, chênh lệch lớn nhất bằng 0 ở 4/4 fold.",
+   "expected_benefit": "Không thêm gì so với sma_20. Cột ở lại chỉ vì DEFAULT_11 được giữ nguyên làm nhánh đối chứng. Bỏ nó đi là tạo ra một giả thuyết khác, và Wave 3 đã đăng ký riêng bộ DEFAULT_NO_DUP_10 (bỏ đúng cột này) để đo ảnh hưởng của cột trùng.",
+   "selection_note": [],
+   "caveat": "Vì cột trùng nhau, phép đo tầm quan trọng từng cột sẽ thấy cả hai cột đều “vô dụng”, vì xáo một cột thì mô hình đọc cột kia thay thế. Mọi phép quy công sau này phải gom hai cột thành một cụm."
+  },
+  {
+   "no": 22,
+   "group": "price",
+   "name": "bb_lower",
+   "full_name": "Bollinger Band, dải dưới",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Mức giá cách trung bình 20 phiên hai độ lệch chuẩn về phía dưới. Đây là biên dưới của vùng giá \"bình thường\" gần đây.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên, k = 2, ddof = 1",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,753"
+   },
+   "information": "Mốc giá động phía dưới. Giá áp sát biên dưới là dấu hiệu bán mạnh, hoặc giá đã giảm quá xa so với vùng quen thuộc.",
+   "expected_benefit": "Cùng với bb_upper, mô hình có đủ hai đầu của dải và nhìn được độ rộng dải. Dải hẹp thường là giai đoạn tích lũy, dải rộng là giai đoạn biến động. Chúng tôi kỳ vọng mô hình học được cả hai kiểu hành vi quanh dải dưới, mua khi giá hồi lên từ biên dưới, và đứng ngoài khi giá bám biên dưới đi xuống.",
+   "selection_note": [],
+   "caveat": "Tương quan với giá thấp hơn dải trên (0,753 so với 0,873) nhưng vẫn cao hơn ngưỡng 0,40 nhiều. Độ rộng dải ở dạng không đơn vị có sẵn trong STATIONARY_12 là bb_width."
+  },
+  {
+   "no": 23,
+   "group": "price",
+   "name": "vwap",
+   "full_name": "Volume-Weighted Average Price, dạng tích lũy",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Giá bình quân gia quyền theo khối lượng. Bản đang chạy không có cửa sổ mà cộng dồn từ dòng dữ liệu đầu tiên của mã.",
+   "facts": {
+    "Đầu vào": "High, Low, Close, Volume",
+    "Cửa sổ": "Không có, tích lũy từ t0",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,615"
+   },
+   "information": "Mốc giá mà dòng tiền thực sự đã giao dịch. Giá đóng cửa nằm trên VWAP nghĩa là phần lớn người mua gần đây đang có lãi.",
+   "expected_benefit": "Nhiều nhất là một mốc rất chậm cho biết giá hiện tại đang ở trên hay dưới giá vốn bình quân nhiều năm của thị trường. Chúng tôi không kỳ vọng nhiều ở cột này. Nó ở lại vì DEFAULT_11 được giữ nguyên làm nhánh đối chứng.",
+   "selection_note": [
+    {
+     "heading": "Thực tế triển khai",
+     "text": "Vì cộng dồn nhiều năm, cột này là giá bình quân dài hạn chứ không phải VWAP theo phiên hay theo tuần. Với FPT, ngày 02/01/2019 VWAP là 10.624 trong khi giá đóng cửa 12.840. Ngày 28/08/2026 VWAP là 87.069 trong khi giá đóng cửa 72.500."
+    }
+   ],
+   "caveat": "Điểm bắt đầu t0 phụ thuộc job nào ghi dòng dữ liệu. Backfill theo mã đọc toàn bộ lịch sử, job gold tăng dần bắt đầu từ 400 ngày lịch trước ngày chạy, EOD finalizer từ 252 ngày lịch, snapshot của lab từ phiên đầu tiên của nhà cung cấp (FPT: 03/01/2017). Metadata khai báo cumulative: False nhưng batch gọi hàm với mặc định True. Cột cần được sửa hoặc đổi tên trước khi dùng cho bộ feature mới."
+  },
+  {
+   "no": 24,
+   "group": "volatility",
+   "name": "atr",
+   "full_name": "Average True Range",
+   "sets": [
+    "DEFAULT_11"
+   ],
+   "what": "Biên độ dao động trung bình một phiên, có tính cả khoảng trống giá qua đêm, đo bằng đồng.",
+   "facts": {
+    "Đầu vào": "High, Low, Close",
+    "Cửa sổ": "EMA span 14 (α = 2/15)",
+    "Đơn vị": "Đồng (VND)",
+    "Tương quan với giá": "0,599"
+   },
+   "information": "Mức rủi ro hiện tại của từng mã, tính theo biên độ thật của phiên chứ không chỉ theo giá đóng cửa.",
+   "expected_benefit": "Cùng một lệnh mua 100 triệu đồng mang rủi ro khác nhau ở mã đang dao động mạnh và mã đang đi ngang. Có ATR, mô hình có cơ sở để cân độ lớn vị thế theo rủi ro. Đây cũng là cột biến động duy nhất trong DEFAULT_11.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Trong bộ 31, vai trò này do natr đảm nhận, cùng thông tin nhưng không mang đơn vị đồng."
+    }
+   ],
+   "caveat": "ATR mang đơn vị đồng, nên mã giá cao luôn có ATR lớn hơn mã giá thấp dù biến động theo phần trăm như nhau. Code dùng EMA span 14, không dùng Wilder smoothing α = 1/14. Phiên đầu tiên TR = H − L."
+  },
+  {
+   "no": 25,
+   "group": "volatility",
+   "name": "natr",
+   "full_name": "Normalized Average True Range",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "ATR chia cho giá đóng cửa, đưa biên độ dao động về phần trăm để so được giữa các mã.",
+   "facts": {
+    "Đầu vào": "High, Low, Close",
+    "Cửa sổ": "14 phiên (EMA span 14)",
+    "Đơn vị": "Phần trăm",
+    "Tương quan với giá": "0,398"
+   },
+   "information": "Cùng thông tin với atr của DEFAULT_11 nhưng không mang đơn vị đồng.",
+   "expected_benefit": "Mã 8 nghìn đồng và mã 200 nghìn đồng cùng dao động 3% một phiên sẽ có cùng NATR. Mô hình dùng được một thang rủi ro chung cho cả rổ, điều atr không làm được.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "ATR nền dùng EMA span 14, không phải Wilder smoothing. Cặp atr/natr là ví dụ rõ nhất trong danh mục về cùng một thông tin ở hai đơn vị, và mỗi bộ con chỉ chọn một trong hai."
+  },
+  {
+   "no": 26,
+   "group": "volatility",
+   "name": "bb_width",
+   "full_name": "Bollinger Band Width",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Độ rộng dải Bollinger quy về phần trăm của dải giữa, tức biến động 20 phiên đã chia cho mặt bằng giá.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "20 phiên, k = 2, ddof = 1",
+    "Đơn vị": "Phần trăm",
+    "Tương quan với giá": "0,288"
+   },
+   "information": "Mức biến động hiện tại của mã, ở dạng so được giữa các mã. Nó thay cho atr và bộ ba bb_* của DEFAULT_11 bằng một con số không đơn vị.",
+   "expected_benefit": "Mô hình biết mã nào đang \"nén\" (dải hẹp, thường đi trước một nhịp bứt) và mã nào đang dao động mạnh. Chúng tôi kỳ vọng nó dùng thông tin này để cân tỉ trọng, giảm vốn ở mã biến động cao.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Trong nhóm biến động, bộ 31 chỉ dựng lại được R² 0,560 của cột này, nằm trong ba cột phủ kém nhất."
+    }
+   ],
+   "caveat": "Đây là dạng không đơn vị của khoảng cách bb_upper − bb_lower, dùng cùng σ20 với ddof = 1. Đơn vị là phần trăm, không phải phân số."
+  },
+  {
+   "no": 27,
+   "group": "volatility",
+   "name": "yang_zhang_volatility",
+   "full_name": "Yang–Zhang Volatility",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Ước lượng biến động kết hợp khoảng trống qua đêm, biến động trong phiên và thành phần Rogers–Satchell, ít phụ thuộc xu hướng và xử lý được cú nhảy lúc mở cửa.",
+   "facts": {
+    "Đầu vào": "Open, High, Low, Close",
+    "Cửa sổ": "21 phiên, năm hoá 252",
+    "Đơn vị": "Phân số năm hoá",
+    "Tương quan với giá": "0,416"
+   },
+   "information": "Mức biến động của mã, ước lượng từ cả bốn giá OHLC thay vì chỉ giá đóng cửa.",
+   "expected_benefit": "Với cùng 21 phiên, ước lượng dùng OHLC có phương sai nhỏ hơn nhiều so với độ lệch chuẩn của lợi suất đóng cửa. Nói cách khác, mô hình nhận được một con số rủi ro ít nhiễu hơn mà không phải kéo dài cửa sổ.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "Đây là cột duy nhất trong 46 cột dùng giá mở cửa. Đường tính causal của Wave 3 không dùng Open, nên cột này chỉ có ở nhánh Huy. Repository cố định k = 0,34, trong khi một số trình bày Yang–Zhang dùng k phụ thuộc kích thước mẫu."
+  },
+  {
+   "no": 28,
+   "group": "volatility",
+   "name": "downside_upside_vol_ratio",
+   "full_name": "Downside-to-Upside Volatility Ratio",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "So độ phân tán của phía giảm với phía tăng. Trên 1 là phía giảm dao động mạnh hơn.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "21 phiên",
+    "Đơn vị": "Tỉ số",
+    "Tương quan với giá": "0,297"
+   },
+   "information": "Biến động của mã là loại “xấu” (dồn về phía giảm) hay loại “tốt” (dồn về phía tăng).",
+   "expected_benefit": "Độ lệch chuẩn thông thường coi tăng mạnh và giảm mạnh là như nhau. Nhà đầu tư thì không. Cột này cho mô hình thấy bất đối xứng đó, và bộ 15 cũ gần như không nhìn thấy nó (R² 0,072).",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì R² 0,072 với bộ 15 cũ, tức hơn 90% phương sai của cột là thông tin mới."
+    }
+   ],
+   "caveat": "Code kẹp lợi suất trái dấu về 0 rồi tính độ lệch chuẩn trên cả cửa sổ, khác với việc chỉ lấy tập con lợi suất âm hoặc dương. Hệ số năm hoá triệt tiêu trong tỉ số."
+  },
+  {
+   "no": 29,
+   "group": "volatility",
+   "name": "vol_of_vol",
+   "full_name": "Volatility of Volatility",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Độ dao động của chính biến động thực hiện. Cao nghĩa là chế độ rủi ro của mã thay đổi thất thường.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "21 phiên bên trong, 63 phiên bên ngoài",
+    "Đơn vị": "Phân số năm hoá",
+    "Tương quan với giá": "0,379"
+   },
+   "information": "Rủi ro của mã có ổn định không. Một mã biến động cao nhưng đều khác một mã lúc lặng lúc bão.",
+   "expected_benefit": "Mô hình cân tỉ trọng dựa trên ước lượng rủi ro hiện tại. Khi rủi ro tự nó thất thường, ước lượng đó kém tin cậy hơn, và cột này là tín hiệu để mô hình bớt tự tin vào con số biến động.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,136."
+    }
+   ],
+   "caveat": "Độ lệch chuẩn bên ngoài không năm hoá lần hai. Các cửa sổ biến động bên trong chồng lấn mạnh."
+  },
+  {
+   "no": 30,
+   "group": "volatility",
+   "name": "chaikin_volatility",
+   "full_name": "Chaikin Volatility",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Tốc độ thay đổi của biên High–Low đã làm mượt. Dương nghĩa là biên độ đang mở rộng so với 10 phiên trước.",
+   "facts": {
+    "Đầu vào": "High, Low",
+    "Cửa sổ": "EMA 10, ROC 10",
+    "Đơn vị": "Phần trăm",
+    "Tương quan với giá": "0,141"
+   },
+   "information": "Biến động đang tăng hay đang giảm, tức đạo hàm của biến động chứ không phải mức của nó.",
+   "expected_benefit": "Mọi cột biến động khác trong danh mục đo mức. Cột này đo chiều thay đổi, nên nó bắt được lúc thị trường của mã bắt đầu “nóng” lên trước khi mức biến động kịp cao.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,181."
+    }
+   ],
+   "caveat": "Không phải ATR và không dùng Close hay khoảng trống qua đêm. Tên trong code đúng với dạng ROC của EMA biên High–Low."
+  },
+  {
+   "no": 31,
+   "group": "volatility",
+   "name": "max_drawdown_1y",
+   "full_name": "Rolling One-year Maximum Drawdown",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Mức giảm sâu nhất từ một đỉnh đến đáy sau đó, trong cửa sổ một năm. Luôn không dương.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "252 phiên",
+    "Đơn vị": "Phân số ≤ 0",
+    "Tương quan với giá": "0,378"
+   },
+   "information": "Ký ức rủi ro một năm của chính mã, tức nó từng rơi sâu tới đâu.",
+   "expected_benefit": "Cổng kiểm định loại chiến lược có sụt giảm danh mục trên 35%. Cột này đưa thông tin gần nhất với tiêu chí đó vào ngay đầu vào, ở cấp từng mã. Kỳ vọng là mô hình dè dặt hơn với mã từng sụt sâu trong năm.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "Đỉnh được tính lại từ đầu mỗi cửa sổ trượt. Đây là drawdown của đường giá mã, không phải drawdown NAV của chiến lược."
+  },
+  {
+   "no": 32,
+   "group": "volume",
+   "name": "volume_zscore",
+   "full_name": "Log-volume Z-score",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Khối lượng hôm nay cao hay thấp so với tháng gần nhất của chính mã đó, tính bằng số độ lệch chuẩn trên thang log.",
+   "facts": {
+    "Đầu vào": "Volume",
+    "Cửa sổ": "21 phiên, gồm cả phiên hiện tại",
+    "Đơn vị": "Số độ lệch chuẩn",
+    "Tương quan với giá": "0,101"
+   },
+   "information": "Mức tham gia của thị trường vào mã đó hôm nay. DEFAULT_11 gần như không có kênh khối lượng (VWAP tích lũy nhiều năm nên hầu như không phản ánh khối lượng hằng ngày). Đây là kênh khối lượng thật đầu tiên của mô hình.",
+   "expected_benefit": "Giá tăng kèm khối lượng cao thường đáng tin hơn giá tăng khi khối lượng thấp. Có cột này, mô hình có thể phân biệt một nhịp tăng có dòng tiền đi kèm với một nhịp tăng thiếu người mua. Log và z-score theo chính mã giúp mã khối lượng 100 nghìn cổ phiếu và mã khối lượng 10 triệu cổ phiếu dùng chung một thang.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy giữ từ bộ 15 cũ, làm cột nền của nhóm khối lượng."
+    }
+   ],
+   "caveat": "Đây là mức hoạt động khối lượng, không phải dòng tiền của khối ngoại hay của nhóm nhà đầu tư nào. Log1p nén đuôi phải. Độ lệch chuẩn bằng 0 sinh NaN."
+  },
+  {
+   "no": 33,
+   "group": "volume",
+   "name": "unusual_volume",
+   "full_name": "Unusual Volume Flag",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Cờ 0/1 bật khi khối lượng log vượt trung bình 21 phiên cộng 2,5 độ lệch chuẩn.",
+   "facts": {
+    "Đầu vào": "Volume",
+    "Cửa sổ": "21 phiên, ngưỡng 2,5σ",
+    "Đơn vị": "Nhị phân 0/1",
+    "Tương quan với giá": "0,053"
+   },
+   "information": "Những phiên đột biến khối lượng, thường gắn với tin tức, giao dịch lớn hoặc sự kiện doanh nghiệp.",
+   "expected_benefit": "Về nội dung, cờ này là volume_zscore > 2,5 (cùng x, cùng cửa sổ, cùng độ lệch chuẩn). Nó không thêm thông tin mới mà làm nổi một ngưỡng mà mạng khó tự học từ dữ liệu ít. Sau VecNormalize, cờ càng hiếm thì giá trị lúc bật càng lớn, nên mô hình khó bỏ qua những phiên này. Chúng tôi kỳ vọng mô hình học được cách phản ứng riêng sau sự kiện, thận trọng hoặc nhanh hơn thường lệ.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy thêm vì bộ 15 cũ, dù đã có volume_zscore, chỉ dựng lại được R² 0,054. Con số này cần đọc kỹ. Cờ này là một ngưỡng của volume_zscore, nhưng hồi quy tuyến tính không bắt được quan hệ ngưỡng nên đánh giá nó như thông tin gần như mới hoàn toàn. Đây là giới hạn của thước R² tuyến tính, không phải một phát hiện."
+    }
+   ],
+   "caveat": "Đây là heuristic nội bộ, không phải kiểm định có p-value. Trong giai đoạn khởi động, snapshot Wave 3 để NaN, còn backend production trả 0. Tương quan với giá 0,053, thấp nhất trong 23 cột."
+  },
+  {
+   "no": 34,
+   "group": "volume",
+   "name": "mfi",
+   "full_name": "Money Flow Index",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Dao động 0–100 kết hợp hướng thay đổi của giá điển hình với khối lượng để mô tả áp lực dòng tiền.",
+   "facts": {
+    "Đầu vào": "High, Low, Close, Volume",
+    "Cửa sổ": "14 phiên",
+    "Đơn vị": "0–100",
+    "Tương quan với giá": "0,299"
+   },
+   "information": "Giống RSI nhưng mỗi phiên được cân bằng giá trị giao dịch, nên phiên tăng trên khối lượng lớn đóng góp nhiều hơn phiên tăng lèo tèo.",
+   "expected_benefit": "Đặt MFI cạnh RSI, mô hình có một phép thử phân kỳ sẵn. RSI cao mà MFI thấp là đà giá không có dòng tiền đi kèm, loại đà dễ gãy.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ, đại diện đầu tiên của nhóm khối lượng."
+    }
+   ],
+   "caveat": "Code dùng tổng trượt 14 phiên và thay mẫu số 0 bằng vô cùng, giống RSI. Hệ quả là khi 14 phiên liền không có phiên nào giá điển hình giảm, MFI ra 0 chứ không phải 100. Cột ghi đúng giá trị của trạng thái quá bán cực độ vào đúng nhịp tăng mạnh nhất. Trên 150 mã của vũ trụ Wave 3 (giá gốc, 01/2019–08/2026), trường hợp này xảy ra ở 96 trên 273.342 mã-ngày (0,035%), rải trên 28 mã. Hiếm, nhưng nên sửa trước khi dùng MFI làm tín hiệu cực trị. Không nên dùng ngưỡng 20/80 như luật giao dịch cứng."
+  },
+  {
+   "no": 35,
+   "group": "volume",
+   "name": "cmf",
+   "full_name": "Chaikin Money Flow",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Vị trí giá đóng cửa trong biên của phiên, cân theo khối lượng, trung bình 20 phiên. Dương khi giá thường đóng cửa ở nửa trên của biên với khối lượng lớn.",
+   "facts": {
+    "Đầu vào": "High, Low, Close, Volume",
+    "Cửa sổ": "20 phiên",
+    "Đơn vị": "−1 đến 1",
+    "Tương quan với giá": "0,287"
+   },
+   "information": "Hướng của dòng tiền trong phiên, tức người mua hay người bán kiểm soát lúc đóng cửa.",
+   "expected_benefit": "volume_zscore chỉ nói khối lượng cao hay thấp. CMF nói khối lượng đó nghiêng về mua hay bán, và hai cột bổ sung cho nhau đúng ở điểm này.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "Repository dùng 20 phiên, nhiều tài liệu dùng 21. Khi H = L, hệ số của phiên đó được đặt bằng 0. Đây là proxy từ giá và khối lượng, không phải dòng tiền của khối ngoại hay nhóm nhà đầu tư nào."
+  },
+  {
+   "no": 36,
+   "group": "volume",
+   "name": "ad_line",
+   "full_name": "Accumulation/Distribution Line",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Đường cộng dồn khối lượng có dấu theo vị trí giá đóng cửa trong biên của phiên.",
+   "facts": {
+    "Đầu vào": "High, Low, Close, Volume",
+    "Cửa sổ": "Cộng dồn từ đầu chuỗi",
+    "Đơn vị": "Cổ phiếu (khối lượng tích lũy)",
+    "Tương quan với giá": "0,680"
+   },
+   "information": "Xu hướng dài hạn của dòng tiền, dùng để so với xu hướng giá. Giá tăng mà đường A/D đi ngang là dấu hiệu phân kỳ.",
+   "expected_benefit": "Bộ 15 cũ gần như không dựng lại được cột này (R² 0,074), nên nó mang thông tin mà các cột khối lượng theo cửa sổ không có. Tuy vậy, thông tin nằm ở độ dốc, không nằm ở mức.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì R² 0,074 với bộ 15 cũ."
+    }
+   ],
+   "caveat": "Là chuỗi cộng dồn nên mức tuyệt đối phụ thuộc điểm bắt đầu chuỗi, giống vwap và nvi. Tương quan với giá 0,680 là hệ quả của việc cộng dồn chứ không phải tín hiệu. Khi dùng cho bộ con mới, nên thay bằng độ dốc theo cửa sổ."
+  },
+  {
+   "no": 37,
+   "group": "volume",
+   "name": "nvi",
+   "full_name": "Negative Volume Index",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Chỉ số cộng dồn biến động giá, chỉ tính những phiên khối lượng thấp hơn phiên trước.",
+   "facts": {
+    "Đầu vào": "Close, Volume",
+    "Cửa sổ": "Cộng dồn từ đầu chuỗi",
+    "Đơn vị": "Chỉ số, gốc 1000",
+    "Tương quan với giá": "Chưa đo được (chuỗi tích lũy)"
+   },
+   "information": "Giá đi thế nào trong những phiên thị trường thưa người. Giả thuyết gốc là những phiên này phản ánh nhà đầu tư kiên nhẫn hơn.",
+   "expected_benefit": "R² với bộ 15 cũ chỉ 0,036, thấp nhất trong cả kho ứng viên. Nói cách khác, gần như không cột nào khác chứa thông tin này, và đó là lý do nó được giữ dù diễn giải gốc chưa được kiểm chứng.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì R² 0,036, cột bị phủ kém nhất của nhóm khối lượng."
+    }
+   ],
+   "caveat": "Phụ thuộc điểm bắt đầu chuỗi và cách điều chỉnh giá. Không nên nhắc lại diễn giải “smart money” như một sự thật đã kiểm chứng. Kiểm toán thang đo trả NaN cho cột này."
+  },
+  {
+   "no": 38,
+   "group": "liquidity",
+   "name": "amihud_illiquidity",
+   "full_name": "Amihud Illiquidity",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Proxy tác động giá, đo giá dịch chuyển bao nhiêu trên mỗi đồng giá trị giao dịch. Cao hơn là kém thanh khoản hơn.",
+   "facts": {
+    "Đầu vào": "Close, Volume",
+    "Cửa sổ": "21 phiên",
+    "Đơn vị": "109 · |r| / đồng",
+    "Tương quan với giá": "0,434"
+   },
+   "information": "Chi phí ẩn khi vào ra vị thế, tức một lệnh lớn đẩy giá đi xa đến đâu.",
+   "expected_benefit": "Mô phỏng chỉ tính phí cố định. Ngoài thực tế, mã kém thanh khoản còn tốn trượt giá. Cột này là cách để mô hình học né những mã mà lợi nhuận trên giấy khó thành lợi nhuận thật.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Nhóm thanh khoản chỉ có hai ứng viên và nhánh Huy giữ cả hai."
+    }
+   ],
+   "caveat": "Tương quan với giá 0,434, nên luật STATIONARY_12 loại cột này và thay bằng zero_return_days. Hai cột đo cùng một thứ theo hai cách. Amihud liên tục và tinh hơn ở mã thanh khoản tốt. Zero-return thô hơn nhưng không mang đơn vị. Nhân 109 chỉ là đổi thang cho hợp độ lớn VND."
+  },
+  {
+   "no": 39,
+   "group": "liquidity",
+   "name": "zero_return_days",
+   "full_name": "Zero-return-day Fraction",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Tỉ lệ phiên giá đóng cửa đứng yên trong 21 phiên. Trong nghiên cứu thanh khoản, tần suất lợi suất bằng 0 phản ánh chi phí giao dịch hoặc giao dịch thưa.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "21 phiên",
+    "Đơn vị": "Tỉ lệ 0–1",
+    "Tương quan với giá": "0,307"
+   },
+   "information": "Mã này có dễ mua bán hay không. Đây là cột thanh khoản không mang đơn vị, được chọn thay cho amihud_illiquidity vì cột kia dính thang giá (0,434).",
+   "expected_benefit": "Mô phỏng tính phí cố định, nhưng ngoài thực tế lệnh ở mã giao dịch thưa khó khớp và trượt giá nhiều hơn. Chúng tôi kỳ vọng mô hình tránh dồn vốn vào những mã này. Cột càng cần thiết ở LOWBETA20, nơi 12–16 trong 20 mã nằm ngoài top-40 thanh khoản.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhóm thanh khoản chỉ có hai ứng viên và nhánh Huy giữ cả hai. Nhánh Duy chỉ giữ cột này vì amihud_illiquidity dính thang giá."
+    }
+   ],
+   "caveat": "Giá trần/sàn, tạm ngừng giao dịch, cách xử lý dữ liệu thiếu và bước giá cũng tạo ra lợi suất bằng 0. Không nên coi mọi giá trị cao là thiếu thanh khoản khi chưa đối chiếu trạng thái giao dịch. Snapshot Wave 3 bỏ qua lợi suất NaN đầu chuỗi, còn backend production đếm nó là 0."
+  },
+  {
+   "no": 40,
+   "group": "risk",
+   "name": "cvar_5pct",
+   "full_name": "Historical CVaR / Expected Shortfall 5%",
+   "sets": [
+    "HUY · 31",
+    "STATIONARY_12"
+   ],
+   "what": "Trung bình các lợi suất nằm trong 5% phiên tệ nhất của quý gần nhất. Thường âm, càng âm thì đuôi lỗ càng nặng.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63 phiên, đuôi 5%",
+    "Đơn vị": "Phân số (−0,05 = −5%)",
+    "Tương quan với giá": "0,274"
+   },
+   "information": "Độ sâu của những phiên xấu nhất, tức một mã khi đã giảm thì thường giảm mạnh đến đâu. Đây là cột duy nhất trong bộ đo thẳng đuôi trái.",
+   "expected_benefit": "Kết hợp với return_skewness, mô hình phân biệt được mã \"biến động nhưng lành\" với mã \"thỉnh thoảng sập\". Chúng tôi kỳ vọng mô hình giảm tỉ trọng mã có CVaR sâu, và nhờ đó giữ mức sụt giảm danh mục dưới ngưỡng 35% của cổng kiểm định. Chiến lược 2 giữ sụt giảm 17,61% ở kỳ test và 24,24% ở lượt xấu nhất trong 18 lượt cùng cấu hình. Hai con số này chưa quy được cho riêng cột CVaR, vì đóng góp từng cột chưa đo.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy cũng giữ",
+     "text": "Nhánh Huy giữ từ bộ 15 cũ, làm cột đại diện của nhóm phân phối rủi ro."
+    }
+   ],
+   "caveat": "63 phiên chỉ có 3–4 quan sát trong đuôi, nên cột nhiễu và rời rạc. Mọi cột được làm tròn 3 chữ số, nên cột phân số này có bước 0,001 (0,1%). Đây không phải ước lượng vốn theo quy định."
+  },
+  {
+   "no": 41,
+   "group": "risk",
+   "name": "return_skewness",
+   "full_name": "Rolling Return Skewness",
+   "sets": [
+    "STATIONARY_12"
+   ],
+   "what": "Độ lệch của phân phối lợi suất ngày trong 63 phiên, khoảng một quý.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63 phiên",
+    "Đơn vị": "Không thứ nguyên",
+    "Tương quan với giá": "0,246"
+   },
+   "information": "Lợi suất của mã lệch về phía nào. Lệch phải là nhiều phiên giảm nhỏ xen vài phiên tăng mạnh. Lệch trái là nhiều phiên tăng nhỏ xen vài phiên sập mạnh.",
+   "expected_benefit": "Hai mã có cùng biến động (cùng bb_width) vẫn có thể mang rủi ro rất khác nhau. Mã lệch trái giấu rủi ro trong vài phiên sập. Độ lệch chuẩn không thấy khác biệt này, còn cột này thì thấy. Chúng tôi kỳ vọng mô hình bớt tỉ trọng ở mã lệch trái kéo dài.",
+   "selection_note": [
+    {
+     "heading": "Đặt cạnh bộ 31 của nhánh Huy",
+     "text": "Bộ 31 chỉ dựng lại được R² 0,394, thuộc ba cột phủ kém nhất của nhóm phân phối rủi ro. Nhánh Huy đã có độ dày đuôi (return_kurtosis) và tỉ số đuôi (tail_ratio), nhưng độ lệch của cả phân phối vẫn là thông tin riêng."
+    }
+   ],
+   "caveat": "63 quan sát là ít cho một mô-men bậc ba, nên cột khá nhiễu. Giá trị đầu tiên xuất hiện ở phiên thứ 64."
+  },
+  {
+   "no": 42,
+   "group": "risk",
+   "name": "return_kurtosis",
+   "full_name": "Rolling Excess Kurtosis",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Mức độ đuôi dày của phân phối lợi suất 63 phiên so với phân phối chuẩn. Bằng 0 là chuẩn.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63 phiên",
+    "Đơn vị": "Không thứ nguyên",
+    "Tương quan với giá": "0,316"
+   },
+   "information": "Mã có hay gặp phiên cực đoan không, bất kể độ lệch chuẩn của nó cao hay thấp.",
+   "expected_benefit": "Đây là trường hợp rõ nhất cho thấy vì sao nhánh Huy phải mở rộng từ 15 lên 31 cột. Bộ 15 cũ dựng lại được R² 0,003 của cột này, tức gần như bằng không. Một mã độ lệch chuẩn thấp nhưng kurtosis cao là mã yên ả phần lớn thời gian rồi bất ngờ sập, và chỉ cột này nhìn thấy điều đó.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì R² 0,003, thấp nhất trong cả 95 ứng viên. Với bộ 15 cũ, gần như toàn bộ thông tin của cột này là mới."
+    }
+   ],
+   "caveat": "Dùng pandas rolling.kurt, ước lượng mẫu đã hiệu chỉnh, trả về excess kurtosis. 63 quan sát là ít cho mô-men bậc bốn nên cột nhiễu."
+  },
+  {
+   "no": 43,
+   "group": "risk",
+   "name": "tail_ratio",
+   "full_name": "Tail Ratio",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "So độ lớn của đuôi tăng với đuôi giảm. Trên 1 là phân vị 95% lớn hơn phân vị 5% về trị tuyệt đối.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63 phiên",
+    "Đơn vị": "Tỉ số",
+    "Tương quan với giá": "0,387"
+   },
+   "information": "Khi mã có phiên cực đoan, phiên đó thường là tăng mạnh hay giảm mạnh.",
+   "expected_benefit": "Kurtosis cho biết đuôi dày đến đâu nhưng không cho biết đuôi nào. Tail ratio trả lời phần còn lại. Kỳ vọng là mô hình ưu tiên mã có đuôi phải dày hơn đuôi trái.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,181."
+    }
+   ],
+   "caveat": "Là tỉ số phân vị, không phải xác suất, và không tính toàn bộ đuôi như CVaR. Mẫu số đúng bằng 0 cho NaN. Mẫu số nhỏ nhưng khác 0 cho giá trị rất lớn, nên cột có đuôi nặng."
+  },
+  {
+   "no": 44,
+   "group": "risk",
+   "name": "max_daily_return",
+   "full_name": "Rolling Maximum Daily Return",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Lợi suất một phiên lớn nhất trong 21 phiên gần nhất.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "21 phiên",
+    "Đơn vị": "Phân số",
+    "Tương quan với giá": "0,388"
+   },
+   "information": "Mã vừa có một phiên tăng đột biến trong tháng hay không, và mạnh đến đâu.",
+   "expected_benefit": "Nghiên cứu về hiệu ứng MAX [R16] cho thấy mã có phiên tăng cực mạnh gần đây thường bị nhà đầu tư trả giá cao như một tấm vé số, và lợi suất sau đó kém hơn. Cột này cho mô hình khả năng học điều đó nếu nó cũng đúng ở thị trường Việt Nam. Chúng tôi chưa kiểm hiệu ứng này trên HOSE.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,127."
+    }
+   ],
+   "caveat": "Biên độ giá trần làm cột này bão hoà. Một phiên chạm trần ở HOSE cho khoảng 7%, ở HNX khoảng 10%, dù cầu thật có thể lớn hơn nhiều. Nhạy với khoảng trống giá, sự kiện doanh nghiệp và giá chưa điều chỉnh."
+  },
+  {
+   "no": 45,
+   "group": "risk",
+   "name": "positive_return_prob",
+   "full_name": "Positive-return Frequency",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Tần suất phiên tăng trong khoảng ba tháng. Đo tỉ lệ thắng theo dấu, không đo độ lớn.",
+   "facts": {
+    "Đầu vào": "Close",
+    "Cửa sổ": "63 phiên",
+    "Đơn vị": "Tỉ lệ 0–1",
+    "Tương quan với giá": "0,532"
+   },
+   "information": "Mã thắng thường xuyên hay thắng thưa. Ghép với max_daily_return và tail_ratio, mô hình có hình dạng đầy đủ hơn của lợi suất, để phân biệt mã thắng nhỏ mà đều với mã thắng lớn mà hiếm.",
+   "expected_benefit": "Hai mã cùng lợi suất quý có thể có tỉ lệ thắng 40% và 60%. Với một chính sách phải trả phí mỗi lần vào ra, mã thắng đều thường dễ giữ hơn. Cột này tách được thông tin đó khỏi độ lớn lợi suất.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Được thêm vào vì bộ 15 cũ chỉ dựng lại được R² 0,152."
+    }
+   ],
+   "caveat": "Phiên lợi suất bằng 0 tính là không dương. Tương quan với giá 0,532 phản ánh việc cột chạy cùng xu hướng giá trong từng mã, không phải đơn vị đồng. Các quan sát không độc lập theo nghĩa Bernoulli i.i.d."
+  },
+  {
+   "no": 46,
+   "group": "risk",
+   "name": "pct_from_52w_high",
+   "full_name": "Distance from 52-week High",
+   "sets": [
+    "HUY · 31"
+   ],
+   "what": "Khoảng cách tương đối từ giá đóng cửa đến giá cao nhất trong tối đa 252 phiên. Bằng 0 khi đang ở đỉnh, thường âm.",
+   "facts": {
+    "Đầu vào": "High, Close",
+    "Cửa sổ": "252 phiên, min_periods = 1",
+    "Đơn vị": "Phân số ≤ 0",
+    "Tương quan với giá": "0,705"
+   },
+   "information": "Giá đang cách đỉnh năm bao xa. Đỉnh 52 tuần là mốc mà nhà đầu tư nhìn rất nhiều, nên nó hoạt động như một điểm neo tâm lý.",
+   "expected_benefit": "George và Hwang [R15] cho thấy khoảng cách tới đỉnh 52 tuần giải thích phần lớn lợi nhuận momentum ở thị trường Mỹ. Lý giải của họ là nhà đầu tư lấy đỉnh này làm mốc neo nên phản ứng chậm với tin tốt khi giá ở gần nó, và mã sát đỉnh vì thế có xu hướng tiếp tục tăng. Cột này cho mô hình đúng thông tin đó mà không cần đi qua mức giá tuyệt đối.",
+   "selection_note": [
+    {
+     "heading": "Vì sao nhánh Huy giữ cột này",
+     "text": "Thuộc bộ 15 cũ."
+    }
+   ],
+   "caveat": "Đỉnh lấy từ cột High, không phải Close. min_periods = 1 khiến cột có giá trị ngay đầu lịch sử dù chưa đủ một năm. Tương quan với giá 0,705, cao nhất trong các cột dạng tỉ số, vì mã tăng giá thì cũng tiến sát đỉnh. Cột không mang đơn vị đồng."
+  }
+ ]
+}
