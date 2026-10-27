@@ -76,12 +76,22 @@ def main(argv=None) -> int:
     p = commands.add_parser("check", help="Validate a complete import-ready local report packet")
     p.add_argument("packet", type=Path)
     p.add_argument("--expected-subject", type=Path, help="Canonical subject JSON for model/evaluation binding")
+    p = commands.add_parser("bind", help="Bind a rendered packet to a verified model bundle before upload")
+    p.add_argument("packet", type=Path)
+    p.add_argument("--bundle", type=Path, required=True)
+    p.add_argument("--output", type=Path, required=True)
+    p = commands.add_parser("attach", help="Attach to a completed import and verify authorized PDF readback")
+    p.add_argument("packet", type=Path)
+    p.add_argument("--import-id", required=True)
+    p.add_argument("--api", required=True)
+    p.add_argument("--token-file", type=Path)
     for name in ("inspect", "verify"):
         p = sub.add_parser(name)
         p.add_argument("bundle", type=Path)
     p = sub.add_parser("import", help="Upload, validate and commit a bundle as a hidden sample")
     p.add_argument("bundle", type=Path)
     p.add_argument("--validate-only", action="store_true")
+    p.add_argument("--with-reports", type=Path, help="Require this bound report packet and verified attach before workflow completion")
     for name in ("status", "commit", "cancel"):
         p = sub.add_parser(name)
         p.add_argument("id")
@@ -130,7 +140,11 @@ def main(argv=None) -> int:
                 raise ValueError("Set STRATEGY_BUNDLE_TOKEN or --token-file to an admin access token")
             with httpx.Client(headers={"Authorization": f"Bearer {token}"}, timeout=300, follow_redirects=False) as client:
                 if args.command == "import":
-                    result = import_bundle(client, base, args.bundle, not args.validate_only)
+                    if args.with_reports:
+                        from .report_api import import_with_report
+                        result = import_with_report(client, base, args.bundle, args.with_reports, commit=not args.validate_only)
+                    else:
+                        result = import_bundle(client, base, args.bundle, not args.validate_only)
                 else:
                     if not all(c in "0123456789abcdef-" for c in args.id) or len(args.id) != 36:
                         raise ValueError("id must be a UUID")
@@ -140,13 +154,17 @@ def main(argv=None) -> int:
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
     except (ValueError, OSError, httpx.HTTPError) as exc:
+        if args.command == "import" and args.with_reports:
+            print(json.dumps({"error": {"code": getattr(exc, "code", "import_failed"), "message": str(exc)},
+                              "details": getattr(exc, "details", {})}, ensure_ascii=False), file=sys.stderr)
+            return 1
         print(f"strategy-bundle: {exc}", file=sys.stderr)
         return 1
 
 
 def report_command(args) -> int:
     # Keep all optional report/render imports out of the established model CLI.
-    from .reports import (ReportError, export_report_skill, pack_report,
+    from .reports import (ReportError, bind_report, export_report_skill, pack_report,
                           prepare_report, render_report, validate_import_report, validate_report)
 
     try:
@@ -161,12 +179,27 @@ def report_command(args) -> int:
             result = render_report(args.spec, args.output)
         elif command == "pack":
             result = pack_report(args.prepared, args.rendered, args.output)
+        elif command == "bind":
+            result = bind_report(args.packet, args.bundle, args.output)
+        elif command == "attach":
+            from .report_api import attach_report
+            base = api_url(args.api)
+            if args.token_file:
+                if args.token_file.stat().st_mode & 0o077:
+                    raise ReportError("token file must be private (chmod 600)")
+                token = args.token_file.read_text().strip()
+            else:
+                token = os.environ.get("STRATEGY_BUNDLE_TOKEN", "").strip()
+            if not token:
+                raise ReportError("Set STRATEGY_BUNDLE_TOKEN or --token-file to an admin access token")
+            with httpx.Client(headers={"Authorization": f"Bearer {token}"}, timeout=300, follow_redirects=False) as client:
+                result = attach_report(client, base, args.import_id, args.packet)
         else:
             subject = json.loads(args.expected_subject.read_text()) if args.expected_subject else None
             result = validate_import_report(args.packet, expected_subject=subject)
         print(json.dumps(result, ensure_ascii=False, indent=2))
         return 0
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError, httpx.HTTPError) as exc:
         code = exc.code if isinstance(exc, ReportError) else "invalid_input"
         print(json.dumps({"error": {"code": code, "message": str(exc)}}, ensure_ascii=False), file=sys.stderr)
         return {"missing_dependency": 3, "render_failed": 4, "skill_integrity": 5}.get(code, 2)

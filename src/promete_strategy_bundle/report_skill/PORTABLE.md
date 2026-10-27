@@ -88,3 +88,39 @@ Exit codes: 0 success; 2 invalid input/incomplete packet; 3 missing optional/sys
 dependency; 4 renderer failure; 5 packaged skill integrity failure. Successful
 results use JSON stdout; report operation failures use JSON stderr. CLI argument
 usage errors retain argparse's standard diagnostics.
+
+## Bind and attach to the platform
+
+The new model-plus-report workflow requires a rendered packet BEFORE model upload:
+
+```sh
+strategy-bundle report bind ./packet --bundle ./model-bundle --output ./bound-report
+strategy-bundle import ./model-bundle --with-reports ./bound-report --api https://app.profinai.vn
+strategy-bundle report attach ./bound-report --import-id <completed-import-uuid> --api https://app.profinai.vn
+```
+
+The `binding` object is separate from `subject`: `{bundleFingerprint, modelSha256,
+evaluationFingerprint, provenance}`. It is included in `packageDigest`. Its evaluation
+fingerprint is SHA-256 of the Pydantic-normalized bundle evaluation serialized as
+UTF-8 JSON with sorted keys, compact separators, ensure_ascii=False, allow_nan=False,
+including default/null fields. Model SHA identifies the normalized import artifact;
+source `subject.modelSha256` identifies the original checkpoint.
+
+For Strategy Lab source mapping, require the normalized bundle's canonical
+`source-evidence.json` research artifact and sourceHashes. The packet declares exact
+original metadata/performance JSON bytes; metadata identity/model hash/window and
+performance values must agree with the canonical imported evidence and evaluation.
+`subject.evaluationFingerprint` identifies the declared raw performance file SHA.
+For sources without that mapping, require exact source provenance/model SHA and
+canonical evaluation fingerprint. Binding adds transport metadata; it never changes
+the source spec/facts/identity or turns incomplete evidence into verified claims.
+
+Attach transport is raw application/zip to
+`POST /api/admin/sample-strategy-imports/{importId}/report`, rooted at manifest.json,
+32MiB compressed/128MiB expanded, admin JWT, Idempotency-Key=packageDigest. Server
+derives sample/model/backtest from that completed import and rechecks binding and
+source evidence. SDK verifies returned binding/identity/digests, then authenticated
+metadata and PDF readback pinned with `?reportId=<id>`, PDF SHA, quoted ETag,
+X-Report-Id and Cache-Control private,no-store. No bearer token is put in a URL.
+Only then is workflowStatus COMPLETE. Model-only legacy import remains compatible;
+its status COMPLETED alone is not completion of the new report workflow.

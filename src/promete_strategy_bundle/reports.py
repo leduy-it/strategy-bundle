@@ -485,7 +485,8 @@ def pack_report(prepared: Path, rendered: Path, output: Path) -> dict:
     return {**checked, 'path': str(Path(output).absolute())}
 
 
-def validate_import_report(packet: Path, *, expected_subject: dict | None = None) -> dict:
+def validate_import_report(packet: Path, *, expected_subject: dict | None = None,
+                           expected_binding: dict | None = None, require_binding: bool = False) -> dict:
     """Check transport readiness, never investment approval or backend import.
 
     A backend must compare expected_subject to its canonical model/evaluation
@@ -526,6 +527,113 @@ def validate_import_report(packet: Path, *, expected_subject: dict | None = None
     source = _sources(packet / 'source-manifest.json')
     _require(source['subject'] == subject, 'source manifest subject mismatch')
     _receipt(packet / 'render.json', inputs)
+    binding = manifest.get('binding')
+    if require_binding or expected_binding is not None:
+        _require(isinstance(binding, dict), 'platform report requires bundle binding')
+    if binding is not None:
+        _require(isinstance(binding, dict) and all(isinstance(binding.get(k), str)
+                 and re.fullmatch('[0-9a-f]{64}', binding[k]) for k in
+                 ['bundleFingerprint', 'modelSha256', 'evaluationFingerprint'])
+                 and isinstance(binding.get('provenance'), dict), 'invalid report binding')
+    if expected_binding is not None:
+        _require(binding == expected_binding, 'report binding does not match canonical model/evaluation')
     return {'valid': True, 'importReady': True, 'scope': 'offline-transport-integrity',
             'financialClaimsVerified': False, 'humanReview': 'required', 'subject': subject,
-            'packageDigest': digest, 'skillManifestSha256': manifest['skillManifestSha256']}
+            'packageDigest': digest, 'skillManifestSha256': manifest['skillManifestSha256'],
+            'platformBindingReady': binding is not None}
+
+
+def report_binding(bundle) -> dict:
+    """Canonical binding; Path inputs are verified, Bundle inputs must be validated."""
+    from .contract import Bundle, fingerprint, verify_bundle
+    bundle = verify_bundle(Path(bundle)) if isinstance(bundle, (str, Path)) else bundle
+    bundle = Bundle.model_validate(bundle) if isinstance(bundle, dict) else bundle
+    models = [a for a in bundle.artifacts if a.role == 'model']
+    _require(len(models) == 1, 'bundle requires one model artifact')
+    return {'bundleFingerprint': fingerprint(bundle), 'modelSha256': models[0].sha256,
+            'evaluationFingerprint': _sha(_canonical(bundle.evaluation.model_dump(mode='json'))),
+            'provenance': bundle.provenance.model_dump(mode='json')}
+
+
+def validate_source_binding(packet: Path, bundle, *, source_evidence: dict | None = None) -> dict:
+    """Shared SDK/server lineage check against an independently verified bundle.
+
+    The server supplies source_evidence loaded from its sealed imported research
+    artifact, never from a client-selected external path. Source subject identity
+    is preserved separately from the normalized model import provenance.
+    """
+    data = bundle.model_dump(mode='json') if hasattr(bundle, 'model_dump') else bundle
+    _require(isinstance(data, dict), 'canonical bundle must be an object')
+    packet = Path(packet)
+    manifest = _json(_file(packet, 'manifest.json'))
+    subject = _subject(manifest.get('subject'))
+    provenance = data['provenance']
+    binding = report_binding(data)
+    source_hashes = data['strategy'].get('research', {}).get('sourceHashes', {})
+    original_model = source_hashes.get('model', {}).get('sha256') if isinstance(source_hashes, dict) else None
+    if not original_model:
+        _require(all(subject.get(k) == provenance[k] for k in ['repository', 'revision', 'runId', 'modelRef', 'seed'])
+                 and subject.get('modelSha256') == binding['modelSha256']
+                 and subject['evaluationFingerprint'] == binding['evaluationFingerprint'],
+                 'source subject/model/evaluation does not match canonical bundle')
+        return {'valid': True, 'lineage': 'exact-canonical-provenance'}
+    _require(subject.get('modelSha256') == original_model and subject['seed'] == provenance['seed']
+             and subject['repository'] == provenance['repository'], 'source checkpoint hash/seed/repository mismatch')
+    _require(isinstance(source_evidence, dict) and isinstance(source_evidence.get('metadata'), dict)
+             and isinstance(source_evidence.get('performance'), dict), 'canonical source-evidence artifact required')
+    metadata, performance = source_evidence['metadata'], source_evidence['performance']
+    _require(metadata.get('model_id') == subject['modelRef'], 'source model identity mismatch')
+    _require(metadata.get('artifact_pair', {}).get('model', {}).get('sha256') == original_model,
+             'source evidence model hash mismatch')
+    windows = metadata.get('windows', {})
+    _require(windows.get('trade_start') == data['evaluation']['startDate']
+             and windows.get('trade_end') == data['evaluation']['endDate'], 'source evaluation window mismatch')
+    declared = _sources(packet / 'source-manifest.json')['files']
+    documents = []
+    for entry in declared:
+        path = _file(packet, entry['path'])
+        if path.suffix.lower() == '.json':
+            documents.append((entry, _json(path)))
+    _require(any(document == metadata for _, document in documents), 'packet lacks canonical source metadata')
+    _require(any(document == performance and entry['sha256'] == subject['evaluationFingerprint']
+                 for entry, document in documents), 'packet source performance/evaluation fingerprint mismatch')
+    metrics = performance.get('benchmarks', {}).get('strategy', {})
+    expected = data['evaluation']['metrics']
+    for source_key, bundle_key, negate in [('return_fraction', 'totalReturn', False),
+                                          ('sharpe', 'sharpeRatio', False),
+                                          ('max_drawdown_fraction', 'maxDrawdown', True)]:
+        value = metrics.get(source_key)
+        if value is not None and negate:
+            value = -abs(value)
+        actual = expected.get(bundle_key)
+        _require((value is None and actual is None) or (type(value) in (int, float)
+                 and type(actual) in (int, float) and math.isclose(value, actual, abs_tol=1e-8, rel_tol=1e-8)),
+                 f'source headline metric does not match canonical evaluation: {bundle_key}')
+    return {'valid': True, 'lineage': 'verified-original-model-and-source-evaluation'}
+
+
+def bind_report(packet: Path, bundle: Path, output: Path) -> dict:
+    """Bind a rendered packet to the verified model bundle before any upload."""
+    from .contract import artifact_path, verify_bundle
+    packet, bundle = Path(packet), Path(bundle)
+    validate_import_report(packet)
+    canonical = verify_bundle(bundle)
+    evidence = None
+    for artifact in canonical.artifacts:
+        if artifact.role == 'research' and Path(artifact.path).name == 'source-evidence.json':
+            evidence = _json(artifact_path(bundle, artifact.path))
+    validate_source_binding(packet, canonical, source_evidence=evidence)
+    binding = report_binding(canonical)
+    with _output(output) as stage:
+        for path in packet.rglob('*'):
+            if path.is_file():
+                target = stage / path.relative_to(packet)
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(path, target)
+        manifest = _json(stage / 'manifest.json')
+        manifest['binding'] = binding
+        manifest.pop('packageDigest', None)
+        manifest['packageDigest'] = _sha(_canonical(manifest))
+        _write(stage / 'manifest.json', manifest)
+        result = validate_import_report(stage, expected_binding=binding)
+    return {**result, 'path': str(Path(output).absolute())}

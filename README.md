@@ -192,7 +192,7 @@ Python dùng cùng giao diện, không cần CLI hay harness runtime:
 ```python
 from promete_strategy_bundle.reports import (
     export_report_skill, prepare_report, validate_report, render_report,
-    pack_report, validate_import_report, ReportError,
+    pack_report, validate_import_report, bind_report, ReportError,
 )
 # Các hàm nhận pathlib.Path; prepare có source_root= tùy chọn.
 # validate_import_report(packet, expected_subject=canonical_subject)
@@ -215,11 +215,37 @@ làm hash output khác nhau giữa hai lần dựng. Font có thể được ren
 Nhánh này xuất phát từ public `origin/main` `cb972035` (v0.1.0). Tag đã phát hành
 v0.2.1 (`836a16a`) đi trước main bốn commit. Candidate đã merge tag này trong
 nhánh cô lập để giữ chức năng export/replay đã phát hành; lịch sử public main và
-checkout chính không bị sửa. Phiên bản base v0.2.1 chưa phải bản release report mới.
+checkout chính không bị sửa. Phiên bản candidate 0.3.0 chưa được publish; tag v0.2.1 không bị thay đổi.
 
-`report` là bộ lệnh local. `strategy-bundle import` v1 vẫn là **legacy model-only**:
+`strategy-bundle import` không có `--with-reports` vẫn là **legacy model-only**:
 `COMPLETED` của lệnh đó không có nghĩa report đã được attach hay toàn bộ quy trình
-model + report hoàn tất. Luồng mới yêu cầu tạo/kiểm report sau train và trước import,
-rồi attach/readback theo contract backend được thống nhất. Package này chưa triển
-khai API attach/generate, orchestration `import --with-reports`, server hay tab UI;
-cài Python package không tự triển khai các thành phần ấy.
+model + report hoàn tất. Luồng đầy đủ phải train → soạn bằng skill → validate/render/
+pack → bind với bundle đã verify → import model + attach và kiểm readback:
+
+```bash
+strategy-bundle report bind ./report-packet --bundle ./model-bundle --output ./bound-report
+strategy-bundle import ./model-bundle --with-reports ./bound-report --api https://app.profinai.vn
+# Nếu model đã COMPLETED nhưng report lỗi, dùng import-id được trả trong error.details:
+strategy-bundle report attach ./bound-report --import-id <uuid> --api https://app.profinai.vn
+```
+
+Lệnh này dùng cùng JWT admin từ `STRATEGY_BUNDLE_TOKEN` hoặc file private. Packet
+phải có trước bước upload model; binding sai sẽ bị chặn local trước network.
+`--validate-only` trả `VALIDATED_REPORT_PENDING`, không attach. Chỉ trả
+`workflowStatus: COMPLETE` sau POST ZIP đến import đã COMPLETED, GET metadata và
+GET PDF có `reportId` bất biến, đúng SHA-256/ETag/X-Report-Id và private/no-store.
+Lỗi attach/readback trả nonzero với `MODEL_IMPORTED_REPORT_PENDING` và model
+receipt để retry riêng report; không coi model receipt là cả workflow hoàn tất.
+
+Binding nằm riêng trong manifest, không sửa danh tính nguồn gốc. Nó chứa bundle
+fingerprint, hash model đã normalize, hash evaluation canonical và provenance
+bundle. Với nguồn lab, file metadata/performance trong packet phải khớp research
+artifact `source-evidence.json` đã verify của bundle; kiểm original model SHA,
+seed, repository, identity, kỳ và headline metrics. Nguồn không có sourceHashes
+phải khớp trực tiếp provenance/model/evaluation. Backend kiểm lại bằng dữ liệu
+import đã seal; claim từ client không thay thế bằng chứng này.
+
+CLI đã có attach/readback; API generation LLM chưa nằm trong package này. Backend
+phải triển khai endpoint report đã thống nhất; cài Python package không tự deploy
+server hay tab UI. Codex/Claude Code/OpenCode dùng cùng SKILL và cùng CLI; kiểm
+tra CLI không có nghĩa đã chạy đủ cả ba harness thực tế.

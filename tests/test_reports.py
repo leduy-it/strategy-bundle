@@ -248,3 +248,236 @@ def test_duplicate_content_source_files_remain_self_contained(report_source, tmp
     rewritten = json.loads((tmp_path / 'prepared' / 'source-manifest.json').read_text())
     assert len({e['path'] for e in rewritten['files']}) == 2
     assert all((tmp_path / 'prepared' / e['path']).is_file() for e in rewritten['files'])
+
+
+@pytest.fixture
+def transport_packet(report_source, bundle_dir, tmp_path):
+    """Synthetic transport fixture; rendering itself has a real integration test."""
+    import zipfile
+    api = reports()
+    from promete_strategy_bundle.contract import verify_bundle
+    bundle = verify_bundle(bundle_dir)
+    source_manifest = report_source / 'source-manifest.json'
+    source = json.loads(source_manifest.read_text())
+    source['subject'].update({k: getattr(bundle.provenance, k) for k in ['repository', 'revision', 'runId', 'modelRef', 'seed']})
+    source['subject']['modelSha256'] = next(a.sha256 for a in bundle.artifacts if a.role == 'model')
+    source['subject']['evaluationFingerprint'] = hashlib.sha256(json.dumps(bundle.evaluation.model_dump(mode='json'), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    write_json(source_manifest, source)
+    facts = json.loads((report_source / 'facts.json').read_text())
+    facts['identity']['model_id'] = bundle.provenance.modelRef
+    write_json(report_source / 'facts.json', facts)
+    prepared, rendered, packet = [tmp_path / n for n in ['transport-prepared', 'transport-rendered', 'transport-packet']]
+    api.prepare_report(report_source, prepared)
+    rendered.mkdir()
+    (rendered / 'synthetic.pdf').write_bytes(b'%PDF-1.4\nsynthetic transport test; not a real research report\n%%EOF\n')
+    with zipfile.ZipFile(rendered / 'synthetic.docx', 'w') as archive:
+        archive.writestr('word/document.xml', '<synthetic-test/>')
+    def entry(path, role):
+        return {'path': str(path.relative_to(prepared)), 'size': path.stat().st_size, 'sha256': sha(path), 'role': role}
+    entries = [entry(prepared / name, role) for name, role in [('report.json', 'report_spec'), ('facts.json', 'facts'), ('source-manifest.json', 'source_manifest')]]
+    for folder, role in [('assets', 'asset'), ('sources', 'source')]:
+        entries.extend(entry(p, role) for p in (prepared / folder).glob('*'))
+    write_json(rendered / 'render.json', {'schemaVersion': 'strategy-report-render/v1',
+        'skillManifestSha256': api.validate_report(prepared / 'report.json')['skillManifestSha256'],
+        'inputs': sorted(entries, key=lambda e: e['path']),
+        'artifacts': [{'path': p.name, 'size': p.stat().st_size, 'sha256': sha(p), 'role': role}
+                      for p, role in [(rendered / 'synthetic.pdf', 'pdf'), (rendered / 'synthetic.docx', 'docx')]],
+        'lint': [], 'non_lexend_fonts': []})
+    api.pack_report(prepared, rendered, packet)
+    return packet
+
+
+def test_bind_report_preserves_source_subject_and_proves_bundle(transport_packet, bundle_dir, tmp_path):
+    api = reports()
+    original = json.loads((transport_packet / 'manifest.json').read_text())
+    bound = tmp_path / 'bound'
+    result = api.bind_report(transport_packet, bundle_dir, bound)
+    manifest = json.loads((bound / 'manifest.json').read_text())
+    from promete_strategy_bundle.contract import verify_bundle, fingerprint
+    bundle = verify_bundle(bundle_dir)
+    assert manifest['subject'] == original['subject']
+    assert manifest['files'] == original['files']
+    assert manifest['binding']['bundleFingerprint'] == fingerprint(bundle)
+    assert manifest['binding']['modelSha256'] == next(a.sha256 for a in bundle.artifacts if a.role == 'model')
+    assert manifest['binding']['provenance'] == bundle.provenance.model_dump(mode='json')
+    assert result['platformBindingReady']
+    assert api.validate_import_report(bound, expected_binding=api.report_binding(bundle_dir))['platformBindingReady']
+
+
+def test_bind_rejects_wrong_source_checkpoint(transport_packet, bundle_dir, tmp_path):
+    api = reports()
+    data = json.loads((bundle_dir / 'manifest.json').read_text())
+    data['provenance']['modelRef'] = 'another-model'
+    write_json(bundle_dir / 'manifest.json', data)
+    with pytest.raises(api.ReportError, match='source|subject'):
+        api.bind_report(transport_packet, bundle_dir, tmp_path / 'bound')
+    assert not (tmp_path / 'bound').exists()
+
+
+def report_server(packet, *, bad_pdf=False, bad_digest=False, bad_header=False):
+    import httpx
+    import io
+    import zipfile
+    manifest = json.loads((packet / 'manifest.json').read_text())
+    calls = []
+    receipt = {'sampleId': 'sample-test', 'status': 'ready', 'reportId': 'report-test',
+               'title': 'Synthetic transport report', 'fileName': 'report.pdf', 'updatedAt': '2026-10-27T00:00:00Z',
+               'modelVersionId': 'model-version-test', 'backtestRunId': 'backtest-test',
+               'packageDigest': '0' * 64 if bad_digest else manifest['packageDigest'],
+               'pdfSha256': sha(packet / 'report.pdf'), 'importFingerprint': manifest['binding']['bundleFingerprint']}
+    def handler(request):
+        calls.append((request.method, request.url.path))
+        if request.url.path.endswith('/report/pdf'):
+            assert request.url.params.get('reportId') == 'report-test'
+        else:
+            assert not request.url.query
+        if request.method == 'POST' and request.url.path.endswith('/report'):
+            assert request.headers['content-type'] == 'application/zip'
+            with zipfile.ZipFile(io.BytesIO(request.read())) as archive:
+                assert json.loads(archive.read('manifest.json')) == manifest
+                assert archive.read('report.pdf') == (packet / 'report.pdf').read_bytes()
+            return httpx.Response(200, json=receipt)
+        if request.url.path.endswith('/report/pdf'):
+            return httpx.Response(200, content=b'%PDF-corrupt' if bad_pdf else (packet / 'report.pdf').read_bytes(), headers={'Content-Type': 'application/pdf', 'ETag': '"' + receipt['pdfSha256'] + '"', 'X-Report-Id': 'wrong-report' if bad_header else 'report-test', 'Cache-Control': 'private, no-store'})
+        if request.url.path.endswith('/report'):
+            return httpx.Response(200, json=receipt)
+        if request.url.path.endswith('/sample-strategy-imports'):
+            return httpx.Response(200, json={'id': '12345678-1234-1234-1234-123456789abc', 'status': 'COMPLETED'})
+        raise AssertionError(str(request.url))
+    return handler, calls
+
+
+def test_attach_requires_verified_readback(transport_packet, bundle_dir, tmp_path):
+    import httpx
+    api = reports()
+    packet = tmp_path / 'bound'
+    api.bind_report(transport_packet, bundle_dir, packet)
+    client_api = importlib.import_module('promete_strategy_bundle.report_api')
+    handler, calls = report_server(packet)
+    with httpx.Client(transport=httpx.MockTransport(handler), headers={'Authorization': 'Bearer test'}, follow_redirects=False) as client:
+        result = client_api.attach_report(client, 'https://test/api/admin/sample-strategy-imports',
+                                          '12345678-1234-1234-1234-123456789abc', packet)
+    assert result['workflowStatus'] == 'COMPLETE'
+    assert result['report']['sampleId'] == 'sample-test'
+    assert calls[-2:] == [('GET', '/api/sample-strategies/sample-test/report'), ('GET', '/api/sample-strategies/sample-test/report/pdf')]
+
+
+@pytest.mark.parametrize('fault', ['digest', 'pdf', 'header'])
+def test_attach_never_completes_on_wrong_readback(transport_packet, bundle_dir, tmp_path, fault):
+    import httpx
+    api = reports()
+    packet = tmp_path / 'bound'
+    api.bind_report(transport_packet, bundle_dir, packet)
+    client_api = importlib.import_module('promete_strategy_bundle.report_api')
+    handler, _ = report_server(packet, bad_digest=fault == 'digest', bad_pdf=fault == 'pdf', bad_header=fault == 'header')
+    with httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False) as client:
+        with pytest.raises(api.ReportError, match='digest|hash|identity'):
+            client_api.attach_report(client, 'https://test/api/admin/sample-strategy-imports',
+                                     '12345678-1234-1234-1234-123456789abc', packet)
+
+
+def test_import_with_reports_preflights_packet_and_resumes_completed_model(transport_packet, bundle_dir, tmp_path):
+    import httpx
+    api = reports()
+    packet = tmp_path / 'bound'
+    api.bind_report(transport_packet, bundle_dir, packet)
+    client_api = importlib.import_module('promete_strategy_bundle.report_api')
+    handler, calls = report_server(packet)
+    with httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False) as client:
+        result = client_api.import_with_report(client, 'https://test/api/admin/sample-strategy-imports', bundle_dir, packet)
+    assert result['workflowStatus'] == 'COMPLETE'
+    assert result['modelImport']['status'] == 'COMPLETED'
+    assert sum(path.endswith('/sample-strategy-imports') for _, path in calls) == 1
+    assert not any(path.endswith('/commit') for _, path in calls)
+    # Reject a model mismatch locally, before any model upload side effect.
+    data = json.loads((bundle_dir / 'manifest.json').read_text())
+    data['provenance']['modelRef'] = 'different-checkpoint'
+    write_json(bundle_dir / 'manifest.json', data)
+    calls.clear()
+    with httpx.Client(transport=httpx.MockTransport(handler), follow_redirects=False) as client:
+        with pytest.raises(api.ReportError, match='binding'):
+            client_api.import_with_report(client, 'https://test/api/admin/sample-strategy-imports', bundle_dir, packet)
+    assert calls == []
+
+
+def test_cli_bind_and_attach_use_same_packet_contract(transport_packet, bundle_dir, tmp_path, monkeypatch, capsys):
+    import httpx
+    from promete_strategy_bundle.cli import main
+    packet = tmp_path / 'bound-cli'
+    assert main(['report', 'bind', str(transport_packet), '--bundle', str(bundle_dir), '--output', str(packet)]) == 0
+    assert json.loads(capsys.readouterr().out)['platformBindingReady']
+    handler, _ = report_server(packet)
+    real_client = httpx.Client
+    monkeypatch.setattr(httpx, 'Client', lambda **kwargs: real_client(transport=httpx.MockTransport(handler), **kwargs))
+    monkeypatch.setenv('STRATEGY_BUNDLE_TOKEN', 'secret-test-token')
+    assert main(['report', 'attach', str(packet), '--import-id', '12345678-1234-1234-1234-123456789abc', '--api', 'https://test']) == 0
+    output = capsys.readouterr()
+    assert json.loads(output.out)['workflowStatus'] == 'COMPLETE'
+    assert 'secret-test-token' not in output.out + output.err
+
+
+def test_cli_import_report_failure_preserves_model_receipt(transport_packet, bundle_dir, tmp_path, monkeypatch, capsys):
+    import httpx
+    from promete_strategy_bundle.cli import main
+    packet = tmp_path / 'bound'
+    reports().bind_report(transport_packet, bundle_dir, packet)
+    handler, _ = report_server(packet, bad_pdf=True)
+    real_client = httpx.Client
+    monkeypatch.setattr(httpx, 'Client', lambda **kwargs: real_client(transport=httpx.MockTransport(handler), **kwargs))
+    monkeypatch.setenv('STRATEGY_BUNDLE_TOKEN', 'secret-test-token')
+    assert main(['import', str(bundle_dir), '--with-reports', str(packet), '--api', 'https://test']) != 0
+    output = capsys.readouterr()
+    assert output.out == ''
+    error = json.loads(output.err)
+    assert error['error']['code'] == 'report_incomplete'
+    assert error['details']['workflowStatus'] == 'MODEL_IMPORTED_REPORT_PENDING'
+    assert error['details']['modelImport']['id'] == '12345678-1234-1234-1234-123456789abc'
+    assert 'secret-test-token' not in output.err
+
+
+@pytest.fixture
+def lab_binding_case(bundle_dir, tmp_path):
+    """Minimal trusted imported research artifact and independently hashed packet sources."""
+    from promete_strategy_bundle.contract import verify_bundle
+    data = verify_bundle(bundle_dir).model_dump(mode='json')
+    original_model_sha = 'b' * 64
+    data['strategy']['research']['sourceHashes'] = {'model': {'sha256': original_model_sha}}
+    metadata = {'model_id': 'attempt:original', 'artifact_pair': {'model': {'sha256': original_model_sha}},
+                'windows': {'trade_start': '2026-01-01', 'trade_end': '2026-01-02'}}
+    performance = {'benchmarks': {'strategy': {'return_fraction': 0.1, 'sharpe': None, 'max_drawdown_fraction': 0.0}}}
+    packet = tmp_path / 'source-binding-case'
+    packet.mkdir()
+    write_json(packet / 'performance.json', performance)
+    write_json(packet / 'metadata.json', metadata)
+    subject = {**data['provenance'], 'modelRef': 'attempt:original', 'revision': 'original-source',
+               'runId': 'original-scan', 'modelSha256': original_model_sha,
+               'evaluationFingerprint': sha(packet / 'performance.json')}
+    write_json(packet / 'manifest.json', {'subject': subject})
+    write_json(packet / 'source-manifest.json', {'schemaVersion': 'strategy-report-source/v1', 'subject': subject,
+        'files': [{'path': p.name, 'size': p.stat().st_size, 'sha256': sha(p)}
+                  for p in [packet / 'performance.json', packet / 'metadata.json']]})
+    return packet, data, {'metadata': metadata, 'performance': performance}
+
+
+def test_source_binding_uses_imported_evidence_instead_of_subject_claims(lab_binding_case):
+    packet, bundle, imported_evidence = lab_binding_case
+    api = reports()
+    assert api.validate_source_binding(packet, bundle, source_evidence=imported_evidence)['lineage'] == 'verified-original-model-and-source-evaluation'
+    # Rehashing attacker-edited source files is insufficient: canonical imported evidence wins.
+    edited = json.loads((packet / 'performance.json').read_text())
+    edited['benchmarks']['strategy']['return_fraction'] = 0.99
+    write_json(packet / 'performance.json', edited)
+    source = json.loads((packet / 'source-manifest.json').read_text())
+    source['subject']['evaluationFingerprint'] = sha(packet / 'performance.json')
+    source['files'][0].update(size=(packet / 'performance.json').stat().st_size, sha256=sha(packet / 'performance.json'))
+    write_json(packet / 'source-manifest.json', source)
+    write_json(packet / 'manifest.json', {'subject': source['subject']})
+    with pytest.raises(api.ReportError, match='performance'):
+        api.validate_source_binding(packet, bundle, source_evidence=imported_evidence)
+
+
+def test_source_binding_rejects_wrong_canonical_window(lab_binding_case):
+    packet, bundle, imported_evidence = lab_binding_case
+    bundle['evaluation']['endDate'] = '2026-01-03'
+    with pytest.raises(reports().ReportError, match='window'):
+        reports().validate_source_binding(packet, bundle, source_evidence=imported_evidence)
