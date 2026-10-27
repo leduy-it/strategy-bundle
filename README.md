@@ -76,3 +76,82 @@ python -m pip install -e '.[test]'
 python -m pytest
 python -m build
 ```
+
+## Báo cáo từ skill hiện có (offline)
+
+Package phân phối nguyên bản skill `strategy-sample-report` của
+`promete-strategy-lab`, bao gồm renderer, references, examples, logo, font Lexend
+và license, dữ liệu giải thích feature; kèm skill evidence-policy được tham chiếu.
+`report skill` xuất cùng một `SKILL.md` cho **Codex, Claude Code và OpenCode**.
+Hãy chỉ định rõ agent đọc file được xuất; không cần SDK riêng của ba harness.
+Provenance và hash từng file nằm trong `manifest.json` của skill. Skill nguồn là
+WIP chưa được Git theo dõi tại snapshot; revision checkout không thay thế hash.
+
+```bash
+strategy-bundle report skill ./report-skill
+# Yêu cầu Codex / Claude Code / OpenCode đọc:
+# ./report-skill/strategy-sample-report/SKILL.md và references của nó.
+# Agent dùng nguồn đã kiểm để soạn report.json; không suy ra metric còn thiếu.
+
+strategy-bundle report prepare ./authored-report --output ./prepared
+strategy-bundle report validate ./prepared/report.json
+
+# Chỉ máy render cần extra Python và system packages:
+python -m pip install '.[report]'
+# Ubuntu/Debian: apt-get install libreoffice-writer poppler-utils fontconfig
+strategy-bundle report render ./prepared/report.json --output ./rendered
+strategy-bundle report pack ./prepared ./rendered --output ./report-packet
+strategy-bundle report check ./report-packet --expected-subject ./canonical-subject.json
+```
+
+`prepare` nhận file spec hoặc thư mục có `report.json`, sao chép assets và
+`facts.json`/`source-manifest.json` nếu được cung cấp, trả **draft**. Nó không tự
+viết báo cáo, gọi LLM hoặc chạy train. Muốn pack phải có facts và manifest nguồn
+đúng danh tính model/evaluation. `render` dùng đúng renderer gốc và tạo receipt
+khóa hash inputs, skill, PDF/DOCX. Sửa nội dung/facts/nguồn phải render lại.
+Mỗi output phải là đường dẫn mới; không ghi đè kết quả hay sửa nguồn.
+
+Để tái dựng spec nghiên cứu cũ có CSV nằm ngoài thư mục report, truyền rõ
+`--source-root /path/to/trusted-research-root` cho `prepare`. Chỉ đường tương đối
+còn nằm trong root này được chấp nhận, mọi asset sẽ được copy/hash và đổi thành
+đường dẫn nội bộ. Path tuyệt đối, symlink và path thoát root đều bị từ chối.
+Không truyền `/` làm trusted root. Hướng dẫn đầy đủ, source manifest, định nghĩa
+packet và exit codes nằm trong `report-skill/PORTABLE.md` sau khi export.
+
+Python dùng cùng giao diện, không cần CLI hay harness runtime:
+
+```python
+from promete_strategy_bundle.reports import (
+    export_report_skill, prepare_report, validate_report, render_report,
+    pack_report, validate_import_report, ReportError,
+)
+# Các hàm nhận pathlib.Path; prepare có source_root= tùy chọn.
+# validate_import_report(packet, expected_subject=canonical_subject)
+```
+
+`validate` kiểm cấu trúc, đường dẫn/file và lint nguyên bản; kiểm glyph cần
+fonttools, trạng thái này được trả trong JSON. `check` bắt buộc PDF/DOCX, facts,
+content, source manifest và render receipt có hash khớp. `importReady` chỉ xác nhận
+packet đủ điều kiện kiểm tra integrity offline, không xác nhận số liệu/lời văn,
+chứng nhận chiến lược hay quyền publish. Phải soát từng trang PDF và đối chiếu
+nguồn theo skill. Backend còn phải bind subject với model/backtest canonical,
+kiểm ACL và thực hiện review. Receipt dùng hash, không phải chữ ký tin cậy.
+
+Renderer có quy trình cố định nhưng toolchain và timestamp của DOCX/PDF có thể
+làm hash output khác nhau giữa hai lần dựng. Font có thể được renderer cài vào
+`~/.local/share/fonts/promete-lexend`. Không có lời hứa PDF tái lập từng byte.
+
+### Ranh giới tích hợp và prerequisite
+
+Nhánh này xuất phát từ public `origin/main` `cb972035` (v0.1.0). Tag đã phát hành
+v0.2.1 (`836a16a`) đi trước main bốn commit. **Cần tích hợp prerequisite đó trước
+khi phát hành** để giữ các chức năng export/replay mới; thay đổi report này không
+merge/cherry-pick tag hoặc sửa logic model/export sẵn có. Phiên bản package hiện
+vẫn là phiên bản base, chưa phải bản release mới.
+
+`report` là bộ lệnh local. `strategy-bundle import` v1 vẫn là **legacy model-only**:
+`COMPLETED` của lệnh đó không có nghĩa report đã được attach hay toàn bộ quy trình
+model + report hoàn tất. Luồng mới yêu cầu tạo/kiểm report sau train và trước import,
+rồi attach/readback theo contract backend được thống nhất. Package này chưa triển
+khai API attach/generate, orchestration `import --with-reports`, server hay tab UI;
+cài Python package không tự triển khai các thành phần ấy.

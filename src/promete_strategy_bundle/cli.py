@@ -56,6 +56,26 @@ def main(argv=None) -> int:
     parser.add_argument("--version", action="version", version=__version__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("schema", help="Print the versioned JSON Schema")
+    report = sub.add_parser("report", help="Offline existing-skill export, preparation, rendering and packing")
+    commands = report.add_subparsers(dest="report_command", required=True)
+    p = commands.add_parser("skill", help="Export the exact shared skill and its source hashes")
+    p.add_argument("destination", type=Path)
+    p = commands.add_parser("prepare", help="Copy existing report content/facts and declared sources into a draft")
+    p.add_argument("source", type=Path)
+    p.add_argument("--output", type=Path, required=True)
+    p.add_argument("--source-root", type=Path, help="Explicit trusted root for legacy external relative assets")
+    p = commands.add_parser("validate", help="Check contained content, files and original editorial lint")
+    p.add_argument("spec", type=Path)
+    p = commands.add_parser("render", help="Render with the pinned original skill (requires .[report] and system tools)")
+    p.add_argument("spec", type=Path)
+    p.add_argument("--output", type=Path, required=True)
+    p = commands.add_parser("pack", help="Seal PDF, content, facts and sources for a later authorized attach")
+    p.add_argument("prepared", type=Path)
+    p.add_argument("rendered", type=Path)
+    p.add_argument("--output", type=Path, required=True)
+    p = commands.add_parser("check", help="Validate a complete import-ready local report packet")
+    p.add_argument("packet", type=Path)
+    p.add_argument("--expected-subject", type=Path, help="Canonical subject JSON for model/evaluation binding")
     for name in ("inspect", "verify"):
         p = sub.add_parser(name)
         p.add_argument("bundle", type=Path)
@@ -70,6 +90,8 @@ def main(argv=None) -> int:
         p.add_argument("--api", required=True, help="Backend origin, e.g. https://app.profinai.vn")
         p.add_argument("--token-file", type=Path, help="JWT file; otherwise STRATEGY_BUNDLE_TOKEN")
     args = parser.parse_args(argv)
+    if args.command == "report":
+        return report_command(args)
     try:
         if args.command == "schema":
             result = Bundle.model_json_schema()
@@ -102,6 +124,34 @@ def main(argv=None) -> int:
     except (ValueError, OSError, httpx.HTTPError) as exc:
         print(f"strategy-bundle: {exc}", file=sys.stderr)
         return 1
+
+
+def report_command(args) -> int:
+    # Keep all optional report/render imports out of the established model CLI.
+    from .reports import (ReportError, export_report_skill, pack_report,
+                          prepare_report, render_report, validate_import_report, validate_report)
+
+    try:
+        command = args.report_command
+        if command == "skill":
+            result = export_report_skill(args.destination)
+        elif command == "prepare":
+            result = prepare_report(args.source, args.output, source_root=args.source_root)
+        elif command == "validate":
+            result = validate_report(args.spec)
+        elif command == "render":
+            result = render_report(args.spec, args.output)
+        elif command == "pack":
+            result = pack_report(args.prepared, args.rendered, args.output)
+        else:
+            subject = json.loads(args.expected_subject.read_text()) if args.expected_subject else None
+            result = validate_import_report(args.packet, expected_subject=subject)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        return 0
+    except (ValueError, OSError) as exc:
+        code = exc.code if isinstance(exc, ReportError) else "invalid_input"
+        print(json.dumps({"error": {"code": code, "message": str(exc)}}, ensure_ascii=False), file=sys.stderr)
+        return {"missing_dependency": 3, "render_failed": 4, "skill_integrity": 5}.get(code, 2)
 
 
 if __name__ == "__main__":

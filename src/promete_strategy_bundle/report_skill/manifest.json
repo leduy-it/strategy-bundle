@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "strategy-report-skill/v1",
+  "source": {
+    "repository": "promete-strategy-lab",
+    "revision": "0963a9c790069a5387e703a25cd62ec4ee8f42fd",
+    "skillPath": ".agents/skills/strategy-sample-report",
+    "skillTracked": false,
+    "snapshotNote": "Source skill is untracked local research WIP at snapshot; revision identifies checkout only. File hashes identify exact source bytes.",
+    "capturedDate": "2026-10-27"
+  },
+  "files": [
+    {
+      "path": "strategy-sample-report/SKILL.md",
+      "sourcePath": ".agents/skills/strategy-sample-report/SKILL.md",
+      "size": 5226,
+      "sha256": "4b5be47596d1bfe87b766b073907ac3e388e311b6ac36a9ffca64cf4ae1f9a1f"
+    },
+    {
+      "path": "strategy-sample-report/assets/fonts/Lexend-Bold.ttf",
+      "sourcePath": ".agents/skills/strategy-sample-report/assets/fonts/Lexend-Bold.ttf",
+      "size": 78552,
+      "sha256": "c09182a9fd4f7169b3ca7f5a14561640860e795182cb35fda70767c37aaa947c"
+    },
+    {
+      "path": "strategy-sample-report/assets/fonts/Lexend-Light.ttf",
+      "sourcePath": ".agents/skills/strategy-sample-report/assets/fonts/Lexend-Light.ttf",
+      "size": 78640,
+      "sha256": "52bafc0d4d2a70c8df3095f8a1df2e8fc229e3872c197dd81a8fe32f793c6869"
+    },
+    {
+      "path": "strategy-sample-report/assets/fonts/OFL.txt",
+      "sourcePath": ".agents/skills/strategy-sample-report/assets/fonts/OFL.txt",
+      "size": 4436,
+      "sha256": "5da8505887d0fa7fe963445fd58852707fda34adfeb65af25c99d152bab285bd"
+    },
+    {
+      "path": "strategy-sample-report/assets/promete-logo.jpg",
+      "sourcePath": ".agents/skills/strategy-sample-report/assets/promete-logo.jpg",
+      "size": 22439,
+      "sha256": "88ee1d02649ed67f070e8931f48d260ab5a9184cfb8c76a3d715fbc5c933f45d"
+    },
+    {
+      "path": "strategy-sample-report/data/feature-rationale.json",
+      "sourcePath": ".agents/skills/strategy-sample-report/data/feature-rationale.json",
+      "size": 72486,
+      "sha256": "a0b70430f89cfad33ad34da1b4832915f1696417594724b9660a033a6a5c534b"
+    },
+    {
+      "path": "strategy-sample-report/examples/chien-luoc-mau-so-1.json",
+      "sourcePath": ".agents/skills/strategy-sample-report/examples/chien-luoc-mau-so-1.json",
+      "size": 19802,
+      "sha256": "42ee07e9b2ae3b9df076024f4efe22a08bc41b94afa23bfc0cdb760cd3de5d08"
+    },
+    {
+      "path": "strategy-sample-report/examples/chien-luoc-mau-so-2.json",
+      "sourcePath": ".agents/skills/strategy-sample-report/examples/chien-luoc-mau-so-2.json",
+      "size": 20704,
+      "sha256": "22f2866e33c8ab9e027a070c73a62ff23e73606c290c04f0a42d3112c69e410a"
+    },
+    {
+      "path": "strategy-sample-report/references/layout-spec.md",
+      "sourcePath": ".agents/skills/strategy-sample-report/references/layout-spec.md",
+      "size": 4350,
+      "sha256": "77816bd6723dda4e928dd296331b44b20437bbc372e5d967fb27bd70529ab7ab"
+    },
+    {
+      "path": "strategy-sample-report/references/source-map.md",
+      "sourcePath": ".agents/skills/strategy-sample-report/references/source-map.md",
+      "size": 5436,
+      "sha256": "e31c7e12c89c639111438ce75baba676dc3673e1dbc6d8a0b9e40893e304ee00"
+    },
+    {
+      "path": "strategy-sample-report/references/voice.md",
+      "sourcePath": ".agents/skills/strategy-sample-report/references/voice.md",
+      "size": 13677,
+      "sha256": "c5cd3f826a7018a3409974c7a51089f59cee89e138aab5d9a976c563d5e5c5a3"
+    },
+    {
+      "path": "strategy-sample-report/scripts/build_report.py",
+      "sourcePath": ".agents/skills/strategy-sample-report/scripts/build_report.py",
+      "size": 32451,
+      "sha256": "902fe91232b77cd7096494d5cbff919e2498a09ae15cfb0155a01ce909d98e69"
+    },
+    {
+      "path": "strategy-sample-report/scripts/feature_digest.py",
+      "sourcePath": ".agents/skills/strategy-sample-report/scripts/feature_digest.py",
+      "size": 3189,
+      "sha256": "7fe616f96b5d669eab67b46015eab485ef51ca49271268d6d2cd8588ac76228f"
+    },
+    {
+      "path": "strategy-sample-report/scripts/wave3_facts.py",
+      "sourcePath": ".agents/skills/strategy-sample-report/scripts/wave3_facts.py",
+      "size": 12919,
+      "sha256": "8630106368b897ee2ef07fa5fd4fbb1460a99d5d24d1e558973e613ea177ffc9"
+    },
+    {
+      "path": "strategy-dossier-editor/SKILL.md",
+      "sourcePath": ".agents/skills/strategy-dossier-editor/SKILL.md",
+      "size": 4802,
+      "sha256": "743ecf9915f6bb02c54fca656cf3ae2eebdf033b1107df8f1d0b254a8ba3a503"
+    },
+    {
+      "path": "strategy-dossier-editor/references/dossier-form.md",
+      "sourcePath": ".agents/skills/strategy-dossier-editor/references/dossier-form.md",
+      "size": 6378,
+      "sha256": "c6420011ee4de941feea09dd754f29491182ea63b4c02cc33c5f84e40c676782"
+    },
+    {
+      "path": "strategy-dossier-editor/references/review-loop.md",
+      "sourcePath": ".agents/skills/strategy-dossier-editor/references/review-loop.md",
+      "size": 5182,
+      "sha256": "ad1fe0fff4fbbbd1435de0601660577bac1b0cbd2c0cf24a150f4857031ce2e6"
+    },
+    {
+      "path": "strategy-dossier-editor/references/source-map.md",
+      "sourcePath": ".agents/skills/strategy-dossier-editor/references/source-map.md",
+      "size": 8166,
+      "sha256": "8b47cce69f2a85aae75ddc26a37cf395de9c151874a2e265e0d0b7d06cd70885"
+    }
+  ]
+}

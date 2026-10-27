@@ -12,12 +12,16 @@ dependencies = ["pydantic>=2.5,<3", "httpx>=0.26,<1"]
 
 [project.optional-dependencies]
 test = ["pytest>=8,<9", "build>=1,<2"]
+report = ["python-docx>=1.1,<2", "matplotlib>=3.8,<4", "fonttools>=4.50,<5"]
 
 [project.scripts]
 strategy-bundle = "promete_strategy_bundle.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+promete_strategy_bundle = ["report_skill/**/*", "report_skill/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -1,0 +1,519 @@
+{
+  "output_name": "chien-luoc-mau-so-2",
+  "meta": {
+    "title": "Báo cáo chiến lược mẫu số 2 — Xoay vòng tập trung trên rổ beta thấp",
+    "source": "weights/releases/wave_3/v6/20260909T160929Z/v2/models/lowbeta-default-crossq-s3 (số liệu: facts.json cùng thư mục)"
+  },
+  "cover": {
+    "kicker": "Báo cáo chiến lược mẫu",
+    "number_line": "Chiến lược mẫu số 2",
+    "title": "Xoay vòng tập trung trên rổ beta thấp",
+    "facts": [
+      [
+        "Mã định danh",
+        "LOWBETA20 · DEFAULT_11 · CrossQ\nVersion lowbeta-default-crossq-s3"
+      ],
+      [
+        "Danh mục đầu tư",
+        "BMP, CTI, DHC, DLG, FIT, GAS, HAX, HUT, KDC, LPB, NT2, PHR, PTB, QNS, REE, SAB, SBT, VCB, VNM, VPI"
+      ],
+      [
+        "Giai đoạn huấn luyện",
+        "01/01/2019 - 28/08/2025"
+      ],
+      [
+        "Giai đoạn kiểm định",
+        "29/08/2025 - 28/08/2026"
+      ]
+    ]
+  },
+  "toc": {
+    "title": "Mục lục"
+  },
+  "sections": [
+    {
+      "title": "Tóm tắt điều hành",
+      "numbered": false,
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Trong một năm kiểm định từ 29/08/2025 đến 28/08/2026, chiến lược **Xoay vòng tập trung trên rổ beta thấp** đạt lợi suất **+18,22%**. Cùng thời gian, VN-Index tăng +8,91%, còn nếu mua đều 20 mã trong rổ rồi nắm giữ thì lỗ −1,50%. Điều chúng tôi đánh giá cao hơn cả lợi nhuận là mức sụt giảm: sâu nhất chỉ −8,14%, khoảng một nửa VN-Index (−16,38%)."
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược do một mô hình học tăng cường (Reinforcement Learning) tự học cách phân bổ vốn từ dữ liệu 2019–2025. Mô hình chỉ được giao dịch trong rổ 20 cổ phiếu có beta thấp nhất, tức ít nhạy nhất với biến động chung, trong nhóm 100 mã thanh khoản cao nhất. Mỗi phiên, nó đọc 11 chỉ báo kỹ thuật của từng mã rồi quyết định tăng, giảm hay giữ nguyên vị thế. Mô phỏng tính phí 0,15% chiều mua, 0,25% chiều bán, lô 100 cổ phiếu và thanh toán T+2."
+        },
+        {
+          "type": "chart",
+          "kind": "line",
+          "ylabel": "Lợi suất lũy kế (%)",
+          "value_format": "{:+.1f}%",
+          "month_step": 2,
+          "h_in": 3.0,
+          "caption": "Lợi suất lũy kế của chiến lược so với VN-Index và mua & giữ cùng rổ trên giai đoạn kiểm định",
+          "series": [
+            {
+              "name": "Chiến lược #1",
+              "csv": "../../../../weights/releases/wave_3/v6/20260909T160929Z/v2/models/lowbeta-default-crossq-s3/report/equity.csv",
+              "x": "date",
+              "y": "equity",
+              "rebase": true,
+              "scale": 100,
+              "color": "orange",
+              "width": 2.2
+            },
+            {
+              "name": "VN-Index",
+              "csv": "../../../../weights/releases/wave_3/v6/20260909T160929Z/v2/models/lowbeta-default-crossq-s3/report/baseline-primary.csv",
+              "x": "date",
+              "y": "equity",
+              "rebase": true,
+              "scale": 100,
+              "color": "dark"
+            },
+            {
+              "name": "Mua & giữ cùng rổ",
+              "csv": "../../../../weights/releases/wave_3/v6/20260909T160929Z/v2/models/lowbeta-default-crossq-s3/report/baseline-supplemental.csv",
+              "x": "date",
+              "y": "equity",
+              "rebase": true,
+              "scale": 100,
+              "color": "grey"
+            }
+          ]
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Chỉ tiêu",
+            "Lần 1 (trình bày)",
+            "Lần 2",
+            "Lần 3"
+          ],
+          "widths": [
+            3.4,
+            2.8,
+            2.6,
+            2.6
+          ],
+          "rows": [
+            [
+              "Lợi nhuận năm",
+              "+18,22%",
+              "+12,00%",
+              "+8,23%"
+            ],
+            [
+              "Vượt VN-Index",
+              "+9,31 đpt",
+              "+3,08 đpt",
+              "−0,68 đpt"
+            ],
+            [
+              "Vượt mua & giữ cùng rổ",
+              "+19,72 đpt",
+              "+13,50 đpt",
+              "+9,73 đpt"
+            ],
+            [
+              "Sharpe (năm)",
+              "1,063",
+              "0,625",
+              "0,570"
+            ],
+            [
+              "Sụt giảm tối đa",
+              "−8,14%",
+              "−16,17%",
+              "−9,89%"
+            ]
+          ],
+          "note": "đpt: điểm phần trăm. Cùng cấu hình được huấn luyện 3 lần độc lập, mỗi lần khởi tạo ngẫu nhiên khác nhau, để kiểm tra độ ổn định; báo cáo trình bày lần 1."
+        },
+        {
+          "type": "p",
+          "text": "Chúng tôi huấn luyện lại cùng cấu hình ba lần độc lập để xem kết quả có phụ thuộc vào may rủi hay không. Cả ba lần đều có lãi và đều thắng mua & giữ cùng rổ, trung vị +12,00%. Mức vượt VN-Index dao động nhiều hơn, từ −0,68 đến +9,31 đpt, nên +18,22% nên được đọc là kết quả tốt nhất trong ba lần."
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược hợp với nhà đầu tư có **khẩu vị rủi ro trung bình**, muốn thêm một phần phân bổ chủ động vào nhóm cổ phiếu phòng thủ. Điều cần cân nhắc kỹ là mức tập trung: mô hình thường chỉ giữ 2–3 mã và có lúc dồn tới 90% danh mục vào một mã."
+        }
+      ]
+    },
+    {
+      "title": "Điểm khác biệt trong chiến lược mẫu của ProFinAI",
+      "new_page": true,
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Một quỹ truyền thống thường bắt đầu từ luận điểm đầu tư: chọn cổ phiếu dựa trên phân tích cơ bản, sau đó mới phân bổ vốn. Chiến lược mẫu của ProFinAI làm theo thứ tự ngược lại. Rổ cổ phiếu được lập bằng quy tắc định lượng, còn mua mã nào, bao nhiêu và vào lúc nào là phần mô hình tự học từ dữ liệu."
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Khía cạnh",
+            "Quỹ đầu tư",
+            "Chiến lược mẫu ProFinAI"
+          ],
+          "widths": [
+            2.6,
+            3.4,
+            6
+          ],
+          "rows": [
+            [
+              "Vai trò của rổ",
+              "Mọi mã trong danh mục đều được giải ngân",
+              "Rổ là phạm vi được phép giao dịch; mô hình chỉ mua mã khi tín hiệu đủ thuận lợi."
+            ],
+            [
+              "Lý do chọn mã",
+              "Phân tích cơ bản từng mã",
+              "Quy tắc định lượng áp lên dữ liệu trước kỳ kiểm định, không có can thiệp của con người."
+            ],
+            [
+              "Tiêu chí thành công",
+              "Lợi nhuận so với chỉ số tham chiếu",
+              "Vượt các tiêu chí kiểm định trên nhiều lần huấn luyện và nhiều năm dữ liệu."
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Vì vậy, khi nói đến một chiến lược, chúng tôi hiểu đó là bộ trọng số của mô hình cùng mọi điều kiện lúc huấn luyện: rổ 20 mã, 11 chỉ báo, thuật toán và môi trường giao dịch mô phỏng. Chỉ cần bỏ một mã khỏi rổ là đã có một chiến lược khác, và chiến lược đó phải được huấn luyện, kiểm định lại từ đầu."
+        }
+      ]
+    },
+    {
+      "title": "Mô tả danh mục",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Rổ **LOWBETA20** được lập theo một quy tắc cố định. Từ 100 mã có giá trị giao dịch bình quân cao nhất giai đoạn huấn luyện, chúng tôi lấy 20 mã có beta thấp nhất so với VN-Index, đo trên 252 phiên trước ngày 28/08/2025. Quy tắc chỉ dùng dữ liệu đến ngày đó, nên danh sách không bị ảnh hưởng bởi những gì xảy ra trong năm kiểm định."
+        },
+        {
+          "type": "p",
+          "text": "Ý tưởng của rổ là cho mô hình làm việc với nhóm cổ phiếu ít chịu tác động của thị trường chung, rồi xem nó có tạo được lợi nhuận mà vẫn giữ rủi ro thấp hay không. Trong năm kiểm định, mô hình giao dịch 11 mã, chủ yếu là **DHC**, **SAB**, **SBT**, **NT2** và **KDC**. Chín mã còn lại (BMP, GAS, LPB, PHR, PTB, QNS, REE, VNM, VPI) chưa lần nào được mua."
+        }
+      ]
+    },
+    {
+      "title": "Tín hiệu đầu vào",
+      "blocks": [
+        {
+          "type": "p",
+          "text": "Với rổ đã cố định, mô hình nhìn thị trường qua 11 chỉ báo kỹ thuật của từng mã, cùng giá, vị thế đang giữ và lượng tiền mặt. Đây là bộ chỉ báo chuẩn đang dùng trên hệ thống ProFinAI, chia thành bốn nhóm:",
+          "keep_next": true
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Nhóm",
+            "Chỉ báo",
+            "Thông tin cung cấp cho mô hình",
+            "Vai trò kỳ vọng"
+          ],
+          "widths": [
+            1.9,
+            3.3,
+            5.4,
+            5.4
+          ],
+          "rules": "dotted",
+          "font_pt": 9.5,
+          "rows": [
+            [
+              "Động lượng",
+              "[01] RSI",
+              "Đà khoảng hai tuần đang nghiêng về bên mua hay bên bán, trên thang 0–100 chung cho mọi mã.",
+              "Theo đà khi RSI tăng dần từ vùng giữa, bớt mua khi RSI đã ở vùng quá mua."
+            ],
+            [
+              "Xu hướng",
+              "[02] MACD line\n[03] MACD signal\n[04] MACD histogram",
+              "Nhịp giá ngắn đang tăng tốc hay yếu đi so với nền trung hạn; histogram thu nhỏ trước khi hai đường cắt nhau.",
+              "Giữ vị thế qua nhiễu từng phiên để tiết kiệm phí; giảm vị thế khi đà yếu đi thay vì chờ giá giảm."
+            ],
+            [
+              "Mốc giá",
+              "[05] Bollinger trên\n[06] Bollinger giữa\n[07] Bollinger dưới\n[09] VWAP\n[10] SMA(20)\n[11] EMA(10)",
+              "Giá đang ở đâu so với các mốc động: sát biên trên hay biên dưới, trên hay dưới trung bình tháng, cặp đường nhanh–chậm.",
+              "Nhận ra lúc xu hướng ngắn đổi hướng; phân biệt đà tăng mạnh với trạng thái quá mua khi đọc cùng RSI và MACD."
+            ],
+            [
+              "Biến động",
+              "[08] ATR",
+              "Biên độ dao động thật của từng mã, tính cả giá cao và thấp trong phiên.",
+              "Làm cơ sở cân độ lớn vị thế theo mức rủi ro của từng mã."
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Hiệu quả thực tế",
+      "new_page": true,
+      "blocks": [
+        {
+          "type": "h2",
+          "text": "Lợi nhuận đến từ đâu"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Mã",
+            "Lệnh mua / bán",
+            "Lãi/lỗ ròng",
+            "Tỷ trọng tối đa",
+            "Tỷ trọng cuối kỳ",
+            "Số phiên nắm giữ"
+          ],
+          "widths": [
+            1.9,
+            2.2,
+            2.2,
+            2.2,
+            2.2,
+            2.2
+          ],
+          "align": [
+            "left",
+            "center",
+            "right",
+            "right",
+            "right",
+            "right"
+          ],
+          "font_pt": 9.5,
+          "rows": [
+            [
+              "DHC",
+              "8 / 7",
+              "+84,1 tr",
+              "29,4%",
+              "0,0%",
+              "75"
+            ],
+            [
+              "SAB",
+              "4 / 10",
+              "+81,2 tr",
+              "87,2%",
+              "0,0%",
+              "51"
+            ],
+            [
+              "SBT",
+              "24 / 15",
+              "+70,1 tr",
+              "77,0%",
+              "0,0%",
+              "160"
+            ],
+            [
+              "NT2",
+              "9 / 6",
+              "+7,6 tr",
+              "25,3%",
+              "0,0%",
+              "70"
+            ],
+            [
+              "HUT",
+              "11 / 10",
+              "−6,9 tr",
+              "28,9%",
+              "0,0%",
+              "54"
+            ],
+            [
+              "VCB",
+              "4 / 3",
+              "−15,6 tr",
+              "29,9%",
+              "0,0%",
+              "22"
+            ],
+            [
+              "KDC",
+              "17 / 10",
+              "−17,7 tr",
+              "90,0%",
+              "90,0%",
+              "198"
+            ],
+            [
+              "CTI",
+              "6 / 3",
+              "−19,4 tr",
+              "14,1%",
+              "0,3%",
+              "92"
+            ],
+            [
+              "3 mã nhỏ",
+              "39 / 21",
+              "−1,1 tr",
+              "≤ 0,9%",
+              "0,0%",
+              "26–59"
+            ],
+            [
+              "**Tổng**",
+              "**207 lệnh**",
+              "**+182,2 tr**",
+              "—",
+              "—",
+              "—"
+            ]
+          ],
+          "note": "Vốn ban đầu 1 tỷ đồng; lãi/lỗ ròng sau phí, gồm cả phần chưa chốt của vị thế cuối kỳ. 3 mã nhỏ: HAX, DLG, FIT; 9 mã còn lại không được mua."
+        },
+        {
+          "type": "p",
+          "text": "Ba mã đem lại phần lớn lợi nhuận đều đã được chốt lãi trước cuối kỳ. DHC được mua ngay phiên đầu tiên và đóng góp 46,1% lãi ròng, dù tỷ trọng chưa lúc nào vượt 29,4%. SAB vào muộn, từ 19/03/2026, nhưng vẫn mang về 81,2 triệu. SBT được giao dịch đều đặn nhất, nằm trong danh mục 160 phiên."
+        },
+        {
+          "type": "p",
+          "text": "KDC lại là trường hợp ngược lại. Đây là vị thế lớn nhất và giữ lâu nhất, 198 phiên, đến cuối kỳ chiếm 90,0% danh mục, nhưng đang lỗ ròng −17,7 triệu. Diễn biến của KDC vì thế sẽ quyết định phần lớn kết quả trong những tháng tới."
+        },
+        {
+          "type": "h2",
+          "text": "Độ bền qua các năm"
+        },
+        {
+          "type": "chart",
+          "kind": "bar",
+          "ylabel": "Lợi suất năm (%)",
+          "value_format": "{:.0f}",
+          "h_in": 3.1,
+          "labels": [
+            "2020–21",
+            "2021–22",
+            "2022–23",
+            "2023–24",
+            "2024–25",
+            "2025–26"
+          ],
+          "series": [
+            {
+              "name": "Trung vị 3 lần huấn luyện",
+              "values": [
+                58.2,
+                -1.4,
+                -15.4,
+                3.1,
+                -12.3,
+                12.0
+              ],
+              "color": "orange"
+            },
+            {
+              "name": "VN-Index",
+              "values": [
+                48.9,
+                -3.4,
+                -5.4,
+                6.4,
+                31.2,
+                8.9
+              ],
+              "color": "grey"
+            }
+          ],
+          "caption": "Cùng cấu hình được huấn luyện và kiểm định lại cho từng năm từ 2020 đến 2026"
+        },
+        {
+          "type": "p",
+          "text": "Một năm tốt chưa nói lên nhiều, nên chúng tôi huấn luyện lại cùng cấu hình và kiểm định trên từng năm từ 2020 đến 2026. Chiến lược thắng VN-Index 3/6 năm, rõ nhất là năm 2020–21 và năm kiểm định hiện tại. Năm 2024–25 là năm tệ nhất: VN-Index tăng +31,17% còn chiến lược lỗ −12,26%. Kết quả giữa các năm vì vậy có thể chênh nhau đáng kể."
+        }
+      ]
+    },
+    {
+      "title": "Quản trị rủi ro và vận hành",
+      "blocks": [
+        {
+          "type": "h2",
+          "text": "Rủi ro tập trung"
+        },
+        {
+          "type": "p",
+          "text": "Chiến lược không giới hạn tỷ trọng từng mã. Mô hình thường giữ 3 mã, mã lớn nhất có tỷ trọng trung vị 71,3% danh mục, và trong 224/248 phiên có một mã chiếm quá nửa danh mục. Khi mã đó gặp tin xấu, toàn bộ danh mục chịu ảnh hưởng gần như trực tiếp. Vì lý do này, chúng tôi khuyến nghị dùng chiến lược như một phần trong danh mục tổng thay vì đặt toàn bộ vốn."
+        },
+        {
+          "type": "h2",
+          "text": "Thanh khoản và chi phí"
+        },
+        {
+          "type": "p",
+          "text": "Trong năm, chiến lược đặt 207 lệnh, vòng quay 10,7 lần giá trị danh mục và trả 22,8 triệu đồng phí, tương đương khoảng 1/8 lãi ròng. Mọi con số trong báo cáo đã trừ khoản phí này. Mô phỏng chạy với vốn 1 tỷ đồng; trước khi triển khai với quy mô lớn hơn, chúng tôi sẽ chạy lại theo từng bậc vốn, có giới hạn tỷ lệ khối lượng giao dịch và trượt giá."
+        },
+        {
+          "type": "h2",
+          "text": "Khi mã trong rổ gặp rủi ro bất ngờ"
+        },
+        {
+          "type": "p",
+          "text": "Khi một mã trong rổ gặp sự cố nghiêm trọng như rủi ro pháp lý, khủng hoảng doanh nghiệp hay hủy niêm yết, chúng tôi xử lý theo hai bước:",
+          "keep_next": true
+        },
+        {
+          "type": "numbered",
+          "items": [
+            "**Ngoài mô hình:** đóng vị thế và khóa mua mã đó ngay từ phiên kế tiếp; phần vốn thu về giữ ở dạng tiền mặt.",
+            "**Trong mô hình:** lập rổ mới không có mã đó, huấn luyện lại và kiểm định đầy đủ. Rổ mới được xem là một chiến lược riêng, có mã định danh riêng."
+          ]
+        },
+        {
+          "type": "h2",
+          "text": "Kết quả kiểm định"
+        },
+        {
+          "type": "table",
+          "columns": [
+            "Tiêu chí",
+            "Kết quả"
+          ],
+          "widths": [
+            7.5,
+            4.5
+          ],
+          "rows": [
+            [
+              "Tối thiểu 40 lệnh trong năm",
+              "Đạt: 207 lệnh"
+            ],
+            [
+              "Sụt giảm tối đa không quá 35%",
+              "Đạt: 8,14%"
+            ],
+            [
+              "Vượt mua & giữ cùng rổ về lợi suất và Sharpe",
+              "Đạt: +19,72 đpt; Sharpe +1,08"
+            ],
+            [
+              "Vượt VN-Index về lợi suất và Sharpe",
+              "Đạt: +9,31 đpt; Sharpe +0,54"
+            ],
+            [
+              "Không mã nào đóng góp quá 50% lãi ròng",
+              "Đạt: lớn nhất DHC 46,14%"
+            ],
+            [
+              "Ổn định giữa 3 lần huấn luyện (độ lệch Sharpe ≤ 0,30)",
+              "Đạt: 0,22"
+            ],
+            [
+              "Sụt giảm tối đa qua 6 năm × 3 lần huấn luyện ≤ 35%",
+              "Chưa đạt: 47,03% (năm 2022–23)"
+            ]
+          ]
+        },
+        {
+          "type": "p",
+          "text": "Các số liệu trong báo cáo đến từ mô phỏng trên dữ liệu lịch sử, đã tính phí giao dịch và quy định thanh toán. Chiến lược này được chọn ra từ nhiều cấu hình đã thử, nên hiệu quả trong tương lai nhiều khả năng thấp hơn năm kiểm định. Kết quả quá khứ không bảo đảm lợi nhuận tương lai."
+        }
+      ]
+    }
+  ]
+}
