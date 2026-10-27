@@ -440,11 +440,14 @@ def lab_binding_case(bundle_dir, tmp_path):
     """Minimal trusted imported research artifact and independently hashed packet sources."""
     from promete_strategy_bundle.contract import verify_bundle
     data = verify_bundle(bundle_dir).model_dump(mode='json')
+    data['evaluation']['metrics']['maxDrawdown'] = 0.1
+    data['evaluation']['endDate'] = '2026-01-03'
+    data['evaluation']['nav'] = [{'date': '2026-01-01', 'balance': 1000}, {'date': '2026-01-02', 'balance': 900}, {'date': '2026-01-03', 'balance': 1100}]
     original_model_sha = 'b' * 64
     data['strategy']['research']['sourceHashes'] = {'model': {'sha256': original_model_sha}}
     metadata = {'model_id': 'attempt:original', 'artifact_pair': {'model': {'sha256': original_model_sha}},
-                'windows': {'trade_start': '2026-01-01', 'trade_end': '2026-01-02'}}
-    performance = {'benchmarks': {'strategy': {'return_fraction': 0.1, 'sharpe': None, 'max_drawdown_fraction': 0.0}}}
+                'windows': {'trade_start': '2026-01-01', 'trade_end': '2026-01-03'}}
+    performance = {'benchmarks': {'strategy': {'return_fraction': 0.1, 'sharpe': None, 'max_drawdown_fraction': -0.1}}}
     packet = tmp_path / 'source-binding-case'
     packet.mkdir()
     write_json(packet / 'performance.json', performance)
@@ -478,6 +481,6 @@ def test_source_binding_uses_imported_evidence_instead_of_subject_claims(lab_bin
 
 def test_source_binding_rejects_wrong_canonical_window(lab_binding_case):
     packet, bundle, imported_evidence = lab_binding_case
-    bundle['evaluation']['endDate'] = '2026-01-03'
+    bundle['evaluation']['endDate'] = '2026-01-04'
     with pytest.raises(reports().ReportError, match='window'):
         reports().validate_source_binding(packet, bundle, source_evidence=imported_evidence)

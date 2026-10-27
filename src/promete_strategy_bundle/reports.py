@@ -604,7 +604,9 @@ def validate_source_binding(packet: Path, bundle, *, source_evidence: dict | Non
                                           ('max_drawdown_fraction', 'maxDrawdown', True)]:
         value = metrics.get(source_key)
         if value is not None and negate:
-            value = -abs(value)
+            # Research performance records signed drawdown; bundle/v1 uses
+            # the nonnegative loss magnitude. Preserve the source bytes.
+            value = abs(value)
         actual = expected.get(bundle_key)
         _require((value is None and actual is None) or (type(value) in (int, float)
                  and type(actual) in (int, float) and math.isclose(value, actual, abs_tol=1e-8, rel_tol=1e-8)),
